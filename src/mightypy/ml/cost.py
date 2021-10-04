@@ -4,6 +4,7 @@ Cost functions of Machine Learning
 
 from typing import Union
 import numpy as np
+from numpy.core.fromnumeric import resize
 
 
 def calculate_mse_cost(y_pred: np.ndarray, y: np.ndarray) -> float:
@@ -16,7 +17,8 @@ def calculate_mse_cost(y_pred: np.ndarray, y: np.ndarray) -> float:
     Returns:
         float: mean squared error cost.
     """
-    diff_squared = np.square(y_pred - y)
+    residual = y_pred - y
+    diff_squared = np.square(residual)
     mse_cost = np.mean(diff_squared) / 2
     return float(mse_cost)
 
