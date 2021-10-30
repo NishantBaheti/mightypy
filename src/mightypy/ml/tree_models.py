@@ -583,13 +583,13 @@ class DecisionTreeRegressor:
         # or number of samples are less than the minimum size of samples to split then
         # stop recursion and return a node
         if (depth > self.max_depth or n_labels == 1 or m_samples < self.min_samples_split):
-            return Node(leaf_value=self._mean_leaf_value(y))
+            return Node(leaf_value=y)
 
         gain, ques, uncertainty = self._find_best_split(X, y)
 
         # if gain is zero no point in going further
         if gain < 0:
-            return Node(leaf_value=self._mean_leaf_value(y))
+            return Node(leaf_value=y)
 
         t_idx, f_idx = self._partition(X, ques)
         true_branch = self._build_tree(
