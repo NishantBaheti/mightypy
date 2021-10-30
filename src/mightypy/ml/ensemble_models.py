@@ -267,3 +267,14 @@ class RandomForestRegressor:
             return final_results
         else:
             raise ValueError("X should be list or numpy array")
+
+
+class AdaboostClassifier:
+    """
+    Under construction.
+
+    """
+    def __init__(self):
+        pass
+
+    

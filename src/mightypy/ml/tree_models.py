@@ -636,18 +636,22 @@ class DecisionTreeRegressor:
             y=self._y
         )
 
-    def print_tree(self, node: Union[Node, None] = None, spacing: str = "|-") -> None:
+    def print_tree(self, node: Union[Node, None] = None, spacing: str = "|-", mean_preds: bool = True) -> None:
         """print the tree
 
         Args:
             node (Union[Node,None], optional): starting node. Defaults to None. then it will go to the root node of the tree.
             spacing (str, optional): printing separater. Defaults to "|-".
+            mean_preds (bool): do the mean of prediction values. Defaults to True.
         """
 
         node = node or self._tree
 
         if node._is_leaf_node:
-            print(spacing, " Predict :", node.leaf_value)
+            if mean_preds:
+                print(spacing, " Predict :", node.leaf_value)
+            else:
+                print(spacing, " Predict :", self._mean_leaf_value(node.leaf_value))
             return
 
         # Print the question at this node
@@ -662,29 +666,34 @@ class DecisionTreeRegressor:
         print(spacing + '--> False:')
         self.print_tree(node.false_branch, "  " + spacing + "-")
 
-    def _regression(self, row: np.ndarray, node: Union[Node, None]) -> float:
+    def _regression(self, row: np.ndarray, node: Union[Node, None], mean_preds: bool) -> float:
         """regression recursive method
 
         Args:
             row (np.ndarray): input matrix.
             node (Union[Node,None]): node to start with. mostly root node. rest will be handled by recursion.
+            mean_preds (bool): do the mean of prediction values.
             
         Returns:
             float: regression result.
         """
 
         if node._is_leaf_node:
-            return node.leaf_value
+            if mean_preds:
+                return self._mean_leaf_value(node.leaf_value)
+            else:
+                return node.leaf_value
 
         if node.question.match(row):
-            return self._regression(row, node.true_branch)
+            return self._regression(row, node.true_branch, mean_preds)
         else:
-            return self._regression(row, node.false_branch)
+            return self._regression(row, node.false_branch, mean_preds)
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: np.ndarray, mean_preds: bool = True) -> np.ndarray:
         """predict regresssion
         Args:
             X (np.ndarray): testing matrix.
+            mean_preds (bool): do the mean of prediction values. Defaults to True.
         Raises:
             ValueError: X should be list or numpy array
         Returns:
@@ -694,12 +703,12 @@ class DecisionTreeRegressor:
             X = np.array(X, dtype='O') if not isinstance(X, (np.ndarray)) else X
 
             if len(X.shape) == 1:
-                result = self._regression(row=X, node=self._tree)
+                result = self._regression(row=X, node=self._tree, mean_preds=mean_preds)
                 return np.array([[result]], dtype='O')
             else:
                 leaf_value = []
                 for row in X:
-                    result = self._regression(row=row, node=self._tree)
+                    result = self._regression(row=row, node=self._tree, mean_preds=mean_preds)
                     leaf_value.append([result])
                 return np.array(leaf_value, dtype='O')
         else:
