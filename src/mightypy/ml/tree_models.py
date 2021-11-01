@@ -649,9 +649,9 @@ class DecisionTreeRegressor:
 
         if node._is_leaf_node:
             if mean_preds:
-                print(spacing, " Predict :", node.leaf_value[...,-1])
-            else:
                 print(spacing, " Predict :", self._mean_leaf_value(node.leaf_value))
+            else:
+                print(spacing, " Predict :", node.leaf_value[...,-1])
             return
 
         # Print the question at this node
