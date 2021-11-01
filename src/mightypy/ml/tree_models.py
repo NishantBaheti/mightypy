@@ -660,11 +660,11 @@ class DecisionTreeRegressor:
 
         # Call this function recursively on the true branch
         print(spacing + '--> True:')
-        self.print_tree(node.true_branch, "  " + spacing + "-")
+        self.print_tree(node.true_branch, "  " + spacing + "-", mean_preds)
 
         # Call this function recursively on the false branch
         print(spacing + '--> False:')
-        self.print_tree(node.false_branch, "  " + spacing + "-")
+        self.print_tree(node.false_branch, "  " + spacing + "-", mean_preds)
 
     def _regression(self, row: np.ndarray, node: Union[Node, None], mean_preds: bool) -> float:
         """regression recursive method
