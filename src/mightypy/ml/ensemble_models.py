@@ -271,10 +271,202 @@ class RandomForestRegressor:
 
 class AdaboostClassifier:
     """
-    Under construction.
+    Adaboost Classification Model.
 
+    [Adaboost explained in this doc](https://machinelearningexploration.readthedocs.io/en/latest/EnsembleMethods/ExploreBoosting.html#Adaboost-Classfication)
     """
-    def __init__(self):
-        pass
+    def __init__(self, n_stumps:int, stump_depth:int=0):
+        self.stump_depth = stump_depth
+        self._X= None
+        self._y= None
+        self._feature_names = None
+        self._stumps:list = []
+        self.n_stumps = n_stumps
 
+    def amount_of_say(self, total_err:Union[np.ndarray, float, int])->Union[np.ndarray, float, int]:
+        """
+        Amount of say.
+
+        .. math::
+            amount of say = log(\frac{1 - TE}{TE})
+
+        Args:
+            total_err (Union[np.ndarray, float, int]): Total error from tree.
+
+        Returns:
+            Union[np.ndarray, float, int]: amount of say.
+        """
+        return np.log((1 - total_err)/ total_err) / 2
+
+    def normalize(self, x:np.ndarray)->np.ndarray:
+        """
+        Nornmalization.
+
+        Args:
+            x (np.ndarray): input array.
+
+        Returns:
+            np.ndarray: normalized values.
+        """
+        return x / x.sum()
+
+    def _update_sample_weight(self, sample_weights:Union[np.ndarray,float], aos:Union[int,float], is_correct:bool)->np.ndarray:
+        """
+        Update sample weight for new tree.
+
+        Args:
+            sample_weights (Union[np.ndarray,float]): sample weight.
+            aos (Union[int,float]): amount of say.
+            is_correct (bool): is correctly classified records.
+
+        Returns:
+            Union[np.ndarray,float]: New updated weights based on amount of say.
+        """
+        if is_correct: # correctly classified records
+            return sample_weights * np.exp(aos)
+        else:
+            return sample_weights * np.exp(-aos)
+
+    def _get_sample_idxs(self, size:int, probs:Union[list,np.ndarray])->np.ndarray:
+        """
+        get indexes based on probabilities from a range.
+
+        Args:
+            size (int): size of array.
+            probs (Union[list,np.ndarray]): probabities of indexes.
+
+        Returns:
+            np.ndarray: sampling indexes.
+        """
+        idxs = np.random.choice(range(size),size=(size,), p=probs)
+        return idxs 
+
+    def train(self, X:np.ndarray, y:np.ndarray, feature_names:list=None, target_name:list=None):
+        """
+        Train the model.
+
+        Args:
+            X (np.ndarray): input features.
+            y (np.ndarray): target.
+            feature_names (list, optional): feature names. Defaults to None.
+            target_name (list, optional): target name. Defaults to None.
+        """
+        X = np.array(X, dtype='O') if not isinstance(
+            X, (np.ndarray)) else X  # converting to numpy array
+        y = np.array(y, dtype='O') if not isinstance(
+            y, (np.ndarray)) else y  # converting to numpy array
+        # reshaping to vectors
+        self._X = X.reshape(-1, 1) if len(X.shape) == 1 else X
+        self._y = y.reshape(-1, 1) if len(y.shape) == 1 else y
+
+        # creating feature names if not mentioned
+        self._feature_names = feature_names or [
+            f"C_{i}" for i in range(self._X.shape[1])]
+
+        # creating target name if not mentioned
+        self._target_name = target_name or ['target']
+
+        sample_weights = np.ones((X.shape[0], 1)) * (1 / X.shape[0])
+
+        sample_X = self._X
+        sample_y = self._y
+        self._n_samples = sample_X.shape[0]
+        aos = -1
+
+        for i_stump in range(self.n_stumps):
+            
+            # building a decision tree stump
+            stump = DecisionTreeClassifier(max_depth=self.stump_depth)
+            stump.train(
+                X=sample_X,
+                y=sample_y,
+                feature_name=self._feature_names,
+                target_name=self._target_name
+            )
+
+            stump_preds = stump.predict(sample_X)
+            total_err = ((stump_preds != sample_y) * sample_weights).sum()
+
+            if total_err == 0:
+                break
+
+            aos = self.amount_of_say(total_err)
+            
+            # if aos <= 0:
+            #     break
+
+            # storing in bag of stumps
+            self._stumps.append({
+                "idx" : i_stump,
+                "model" : stump,
+                "aos" : aos
+            })
+
+            # preparation for next stump
+            wrong_class_weights = (stump_preds != y) * sample_weights
+            right_class_weights = (stump_preds == y) * sample_weights
+
+            new_wrong_class_weights = self._update_sample_weight(
+                sample_weights=wrong_class_weights,
+                aos = aos,
+                is_correct= False
+            )
+
+            new_right_class_weights = self._update_sample_weight(
+                sample_weights=right_class_weights,
+                aos=aos,
+                is_correct=True
+            )
+
+            # new sample weights
+            sample_weights = self.normalize(new_right_class_weights + new_wrong_class_weights)
+            
+            # new samples
+            sample_idxs = self._get_sample_idxs(size=self._n_samples,probs=sample_weights[...,-1])
+            sample_X = sample_X[sample_idxs]
+            sample_y = sample_y[sample_idxs]
+
+
+    def predict(self, X:np.ndarray)->np.ndarray:
+        """
+        Generate predictions.
+
+        Args:
+            X (np.ndarray): input array.
+
+        Returns:
+            np.ndarray: predictions.
+        """
+        results = np.zeros((X.shape[0],1))
+        for stump in self._stumps:
+            results = results + (stump['aos'] * stump['model'].predict(X))
+        
+        return np.sign(results)
     
+
+if __name__ == "__main__":
+    sample_data = np.array([
+        ['yes', 'yes', 205, 1],
+        ['no', 'yes', 180, 0],
+        ['yes', 'no', 210, 1],
+        ['yes', 'yes', 167, 1],
+        ['no', 'yes', 156, 0],
+        ['no', 'yes', 125, 1],
+        ['yes', 'no', 168, 0],
+        ['yes', 'yes', 172, 0]
+    ],dtype='O')
+    headers = ['Chest Pain', 'Blocked Arteries', 'Patient Weight', 'Heart Disease']
+    X = sample_data[...,[0,1,2]]
+    y = sample_data[...,[-1]]
+    feature_names =headers[:-1]
+    target_name = headers[-1]
+
+
+    model = AdaboostClassifier(n_stumps=100)
+    model.train(
+        X=X,
+        y=y,
+        feature_names=feature_names,
+        target_name=target_name
+    )
+    print(model.predict(X))
