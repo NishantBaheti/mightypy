@@ -272,8 +272,10 @@ class RandomForestRegressor:
 class AdaboostClassifier:
     """
     Adaboost Classification Model.
+    
+    It is still under construction.
 
-    [Adaboost explained in this doc](https://machinelearningexploration.readthedocs.io/en/latest/EnsembleMethods/ExploreBoosting.html#Adaboost-Classfication)
+    .. _Adaboost: https://machinelearningexploration.readthedocs.io/en/latest/EnsembleMethods/ExploreBoosting.html#Adaboost-Classfication
     """
     def __init__(self, n_stumps:int, stump_depth:int=0):
         self.stump_depth = stump_depth
@@ -296,7 +298,7 @@ class AdaboostClassifier:
         Returns:
             Union[np.ndarray, float, int]: amount of say.
         """
-        return np.log((1 - total_err)/ total_err) / 2
+        return np.log((1 - total_err)/ total_err) / 2.0
 
     def normalize(self, x:np.ndarray)->np.ndarray:
         """
@@ -341,6 +343,22 @@ class AdaboostClassifier:
         idxs = np.random.choice(range(size),size=(size,), p=probs)
         return idxs 
 
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """
+        Generate predictions.
+
+        Args:
+            X (np.ndarray): input array.
+
+        Returns:
+            np.ndarray: predictions.
+        """
+        results = np.ones((X.shape[0], 1)) * self.leaf_value
+        for stump in self._stumps:
+            results = results + (stump['aos'] * stump['model'].predict(X))
+
+        return results
+
     def train(self, X:np.ndarray, y:np.ndarray, feature_names:list=None, target_name:list=None):
         """
         Train the model.
@@ -366,7 +384,8 @@ class AdaboostClassifier:
         # creating target name if not mentioned
         self._target_name = target_name or ['target']
 
-        sample_weights = np.ones((X.shape[0], 1)) * (1 / X.shape[0])
+        self.leaf_value = 1 / X.shape[0]
+        sample_weights = np.ones((X.shape[0], 1)) * self.leaf_value
 
         sample_X = self._X
         sample_y = self._y
@@ -374,6 +393,7 @@ class AdaboostClassifier:
         aos = -1
 
         for i_stump in range(self.n_stumps):
+            print(i_stump," number of stump")
             
             # building a decision tree stump
             stump = DecisionTreeClassifier(max_depth=self.stump_depth)
@@ -384,27 +404,31 @@ class AdaboostClassifier:
                 target_name=self._target_name
             )
 
-            stump_preds = stump.predict(sample_X)
+            stump_preds = self.predict(sample_X) + stump.predict(sample_X)
+            
             total_err = ((stump_preds != sample_y) * sample_weights).sum()
 
-            if total_err == 0:
+            if total_err <= 0:
+                print("early stopping as total error is <= 0", total_err)
                 break
 
             aos = self.amount_of_say(total_err)
             
-            # if aos <= 0:
-            #     break
+            if aos <= 0.0:
+                print("early stopping as amount of say is <= 0", aos)
+                break
 
             # storing in bag of stumps
             self._stumps.append({
-                "idx" : i_stump,
-                "model" : stump,
-                "aos" : aos
+                "idx": i_stump,
+                "model": stump,
+                "aos": aos
             })
 
             # preparation for next stump
-            wrong_class_weights = (stump_preds != y) * sample_weights
-            right_class_weights = (stump_preds == y) * sample_weights
+            wrong_class_weights = (stump_preds != sample_y) * sample_weights
+            right_class_weights = (stump_preds == sample_y) * sample_weights
+
 
             new_wrong_class_weights = self._update_sample_weight(
                 sample_weights=wrong_class_weights,
@@ -414,59 +438,31 @@ class AdaboostClassifier:
 
             new_right_class_weights = self._update_sample_weight(
                 sample_weights=right_class_weights,
-                aos=aos,
+                aos = aos,
                 is_correct=True
             )
-
-            # new sample weights
-            sample_weights = self.normalize(new_right_class_weights + new_wrong_class_weights)
             
+            # new sample weights
+            new_sample_weights = new_right_class_weights + new_wrong_class_weights
+            sample_weights = self.normalize(new_sample_weights)
+
             # new samples
             sample_idxs = self._get_sample_idxs(size=self._n_samples,probs=sample_weights[...,-1])
             sample_X = sample_X[sample_idxs]
             sample_y = sample_y[sample_idxs]
 
 
-    def predict(self, X:np.ndarray)->np.ndarray:
-        """
-        Generate predictions.
-
-        Args:
-            X (np.ndarray): input array.
-
-        Returns:
-            np.ndarray: predictions.
-        """
-        results = np.zeros((X.shape[0],1))
-        for stump in self._stumps:
-            results = results + (stump['aos'] * stump['model'].predict(X))
-        
-        return np.sign(results)
+    
     
 
 if __name__ == "__main__":
-    sample_data = np.array([
-        ['yes', 'yes', 205, 1],
-        ['no', 'yes', 180, 0],
-        ['yes', 'no', 210, 1],
-        ['yes', 'yes', 167, 1],
-        ['no', 'yes', 156, 0],
-        ['no', 'yes', 125, 1],
-        ['yes', 'no', 168, 0],
-        ['yes', 'yes', 172, 0]
-    ],dtype='O')
-    headers = ['Chest Pain', 'Blocked Arteries', 'Patient Weight', 'Heart Disease']
-    X = sample_data[...,[0,1,2]]
-    y = sample_data[...,[-1]]
-    feature_names =headers[:-1]
-    target_name = headers[-1]
+    from sklearn.datasets import make_classification
 
+    X,y = make_classification(n_classes=2,n_features=4,n_samples=100)
 
     model = AdaboostClassifier(n_stumps=100)
     model.train(
         X=X,
-        y=y,
-        feature_names=feature_names,
-        target_name=target_name
+        y=y
     )
     print(model.predict(X))
