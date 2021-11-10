@@ -7,8 +7,6 @@ class Node:
     """
 
     def __init__(self, data):
-        """
-        """
         self.data = data
         self._left = None
         self._right = None
@@ -28,6 +26,45 @@ class Node:
     @right.setter
     def right(self,new_right):
         self._right = new_right
+
+    def __repr__(self) -> str:
+        return f"""Tree Node Value:{self.data}"""
+
+
+
+class BinaryTree:
+
+    def __init__(self) -> None:
+        self._root = None
+
+    def insert(self,val):
+        """
+        Level order insertion.
+
+        Args:
+            val (Any): value of the node in tree.
+        """
+        if not self._root:
+            self._root = Node(val)
+            return
+
+        q = []
+        q.append(self._root)
+        while len(q):
+            temp = q.pop(0)
+
+            if not temp.left:
+                temp.left = Node(val)
+                break
+            else:
+                q.append(temp.left)
+
+            if not temp.right:
+                temp.right = Node(val)
+                break
+            else:
+                q.append(temp.right)
+
 
     def _inorder_traverse_rec(self, node, values=[]):
         """Inorder traversal recursive function
@@ -108,19 +145,19 @@ class Node:
         """
 
         node_values = []
-        current_node = self
-        stack = [] 
+        current_node = self._root
+        stack = []
 
         while True:
             if current_node is not None:
                 stack.append(current_node)
                 current_node = current_node.left
-            
-            elif stack: # if stack is empty then true
-                current_node = stack.pop() # pop the node top of the stack
+
+            elif stack:  # if stack is empty then true
+                current_node = stack.pop()  # pop the node top of the stack
                 node_values.append(current_node.data)
                 current_node = current_node.right
-            
+
             else:
                 break
         return node_values
@@ -136,7 +173,7 @@ class Node:
             node_values (list): node values
         """
         node_values = []
-        current_node = self
+        current_node = self._root
         stack = []
 
         while True:
@@ -163,7 +200,7 @@ class Node:
             node_values (list): node values
         """
         node_values = []
-        current_node = self
+        current_node = self._root
         stack = []
 
         while True:
@@ -174,7 +211,7 @@ class Node:
 
             elif stack:  # if stack is empty then true
                 current_node = stack.pop()  # pop the node top of the stack
-                
+
                 if len(stack) > 0 and stack[-1] == current_node:
                     current_node = current_node.right
                 else:
@@ -184,7 +221,7 @@ class Node:
                 break
         return node_values
 
-    def traverse_tree(self, order="in",method="stack"):
+    def traverse(self, order="in", method="stack"):
         """Tree traversal operation
 
         Args:
@@ -200,14 +237,14 @@ class Node:
         method = method.lower()
         if method == "recursion":
             if order == "in":
-                values = self._inorder_traverse_rec(node=self, values=[])
+                values = self._inorder_traverse_rec(node=self._root, values=[])
             elif order == "pre":
-                values = self._preorder_traverse_rec(node=self, values=[])
+                values = self._preorder_traverse_rec(node=self._root, values=[])
             elif order == "post":
-                values = self._postorder_traverse_rec(node=self, values=[])
+                values = self._postorder_traverse_rec(node=self._root, values=[])
             else:
                 raise ValueError(f"order : '{order}' is not defined.")
-        
+
         elif method == "stack":
             if order == "in":
                 values = self._inorder_traverse_stack()
@@ -217,7 +254,7 @@ class Node:
                 values = self._postorder_traverse_stack()
             else:
                 raise ValueError(f"order : '{order}' is not defined.")
-        
+
         else:
             raise ValueError(f"method : '{method}' is not defined.")
 
@@ -226,19 +263,15 @@ class Node:
 
 if __name__ == "__main__":
 
-    root = Node(1)
-    root.left = Node(2)
-    root.right = Node(3)
-    root.left.left = Node(4)
-    root.left.right = Node(5)
-    root.right.left = Node(6)
-    root.right.right = Node(7)
+    tree = BinaryTree()
+    for i in range(5):
+        tree.insert(i)
 
-    print(root.traverse_tree(order="post",method="stack"))
-    print(root.traverse_tree(order="post", method="recursion"))
+    print(tree.traverse(order="post",method="stack"))
+    print(tree.traverse(order="post", method="recursion"))
 
-    print(root.traverse_tree(order="pre",method="stack"))
-    print(root.traverse_tree(order="pre", method="recursion"))
+    print(tree.traverse(order="pre",method="stack"))
+    print(tree.traverse(order="pre", method="recursion"))
 
-    print(root.traverse_tree(order="in", method="stack"))
-    print(root.traverse_tree(order="in", method="recursion"))
+    print(tree.traverse(order="in", method="stack"))
+    print(tree.traverse(order="in", method="recursion"))
