@@ -35,11 +35,28 @@ class Node:
 class BinaryTree:
 
     def __init__(self) -> None:
-        self._root = None
+        self._root = None   
+
+    def _calc_height(self,node):
+        if node is None:
+            return 0
+        else:
+            # Compute the height of each subtree
+            lheight = self._calc_height(node.left)
+            rheight = self._calc_height(node.right)
+    
+            # Use the larger one
+            return max(lheight, rheight) + 1
+
+    @property
+    def height(self):
+        return self._calc_height(self._root)
 
     def insert(self,val):
         """
         Level order insertion.
+
+        https://en.wikipedia.org/wiki/Breadth-first_search
 
         Args:
             val (Any): value of the node in tree.
@@ -65,6 +82,23 @@ class BinaryTree:
             else:
                 q.append(temp.right)
 
+    def _level_order_traverse(self):
+        if self._root is None:
+            return
+        
+        q = []
+        values = []
+        q.append(self._root)
+        while len(q):
+            values.append(q[0].data)
+            node = q.pop(0)
+
+            if node.left is not None:
+                q.append(node.left)
+            
+            if node.right is not None:
+                q.append(node.right)
+        return values
 
     def _inorder_traverse_rec(self, node, values=[]):
         """Inorder traversal recursive function
@@ -226,37 +260,43 @@ class BinaryTree:
 
         Args:
             order (str, optional): order in which the tree will be traversed. Defaults to "in".
+                                    Options available -
+                                    "level","in","pre","post"
 
         Raises:
-            ValueError: If wrong order is passed. only "in","pre","post" is allowed
+            ValueError: If wrong order is passed. only "level","in","pre","post" is allowed
 
         Returns:
             values (list): Values of tree nodes in specified order
         """
         order = order.lower()
         method = method.lower()
-        if method == "recursion":
-            if order == "in":
-                values = self._inorder_traverse_rec(node=self._root, values=[])
-            elif order == "pre":
-                values = self._preorder_traverse_rec(node=self._root, values=[])
-            elif order == "post":
-                values = self._postorder_traverse_rec(node=self._root, values=[])
-            else:
-                raise ValueError(f"order : '{order}' is not defined.")
 
-        elif method == "stack":
-            if order == "in":
-                values = self._inorder_traverse_stack()
-            elif order == "pre":
-                values = self._preorder_traverse_stack()
-            elif order == "post":
-                values = self._postorder_traverse_stack()
-            else:
-                raise ValueError(f"order : '{order}' is not defined.")
-
+        if order=="level":
+            values = self._level_order_traverse()
         else:
-            raise ValueError(f"method : '{method}' is not defined.")
+            if method == "recursion":
+                if order == "in":
+                    values = self._inorder_traverse_rec(node=self._root, values=[])
+                elif order == "pre":
+                    values = self._preorder_traverse_rec(node=self._root, values=[])
+                elif order == "post":
+                    values = self._postorder_traverse_rec(node=self._root, values=[])
+                else:
+                    raise ValueError(f"order : '{order}' is not defined.")
+
+            elif method == "stack":
+                if order == "in":
+                    values = self._inorder_traverse_stack()
+                elif order == "pre":
+                    values = self._preorder_traverse_stack()
+                elif order == "post":
+                    values = self._postorder_traverse_stack()
+                else:
+                    raise ValueError(f"order : '{order}' is not defined.")
+
+            else:
+                raise ValueError(f"method : '{method}' is not defined.")
 
         return values
 
@@ -264,14 +304,20 @@ class BinaryTree:
 if __name__ == "__main__":
 
     tree = BinaryTree()
-    for i in range(5):
+    for i in range(1,6):
         tree.insert(i)
 
-    print(tree.traverse(order="post",method="stack"))
-    print(tree.traverse(order="post", method="recursion"))
 
-    print(tree.traverse(order="pre",method="stack"))
-    print(tree.traverse(order="pre", method="recursion"))
+    print("height", tree.height)
 
-    print(tree.traverse(order="in", method="stack"))
-    print(tree.traverse(order="in", method="recursion"))
+    print("level", tree.traverse(order="level", method="stack"))
+
+
+    print("post", tree.traverse(order="post",method="stack"))
+    print("post", tree.traverse(order="post", method="recursion"))
+
+    print("pre", tree.traverse(order="pre",method="stack"))
+    print("pre", tree.traverse(order="pre", method="recursion"))
+
+    print("in", tree.traverse(order="in", method="stack"))
+    print("in", tree.traverse(order="in", method="recursion"))
