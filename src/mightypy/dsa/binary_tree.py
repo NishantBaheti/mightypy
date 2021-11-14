@@ -37,13 +37,14 @@ class BinaryTree:
     def __init__(self) -> None:
         self._root = None   
 
-    def _calc_height(self,node):
+    @staticmethod
+    def _calc_height(node):
         if node is None:
             return 0
         else:
             # Compute the height of each subtree
-            lheight = self._calc_height(node.left)
-            rheight = self._calc_height(node.right)
+            lheight = BinaryTree._calc_height(node.left)
+            rheight = BinaryTree._calc_height(node.right)
     
             # Use the larger one
             return max(lheight, rheight) + 1
@@ -300,11 +301,27 @@ class BinaryTree:
 
         return values
 
+    @staticmethod
+    def _invert(node):
+
+        node.left, node.right = node.right, node.left
+        if node.left:
+            BinaryTree._invert(node=node.left)
+        if node.right:
+            BinaryTree._invert(node=node.right)
+
+    def invert(self):
+        self._invert(node=self._root)
+
+
+    
+
+
 
 if __name__ == "__main__":
 
     tree = BinaryTree()
-    for i in range(1,6):
+    for i in range(1,7):
         tree.insert(i)
 
 
@@ -312,12 +329,17 @@ if __name__ == "__main__":
 
     print("level", tree.traverse(order="level", method="stack"))
 
+    tree.invert()
 
-    print("post", tree.traverse(order="post",method="stack"))
-    print("post", tree.traverse(order="post", method="recursion"))
+    print("level", tree.traverse(order="level", method="stack"))
+    print("height", tree.height)
 
-    print("pre", tree.traverse(order="pre",method="stack"))
-    print("pre", tree.traverse(order="pre", method="recursion"))
 
-    print("in", tree.traverse(order="in", method="stack"))
-    print("in", tree.traverse(order="in", method="recursion"))
+    # print("post", tree.traverse(order="post",method="stack"))
+    # print("post", tree.traverse(order="post", method="recursion"))
+
+    # print("pre", tree.traverse(order="pre",method="stack"))
+    # print("pre", tree.traverse(order="pre", method="recursion"))
+
+    # print("in", tree.traverse(order="in", method="stack"))
+    # print("in", tree.traverse(order="in", method="recursion"))
