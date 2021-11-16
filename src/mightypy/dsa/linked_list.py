@@ -1,6 +1,7 @@
 """
 Linked list setup
 """
+
 class Node:
     def __init__(self, data):
         self.data = data 
@@ -12,15 +13,18 @@ class Node:
 
     @next.setter
     def next(self,new_next):
-        self.next = new_next
+        self._next = new_next
+
+    def __repr__(self):
+        return f"Node Value : {self.data}"
 
 class LinkedList:
     def __init__(self):
         self.head = None
         self.tail = None
 
-    def insert(self,value):
-        """Insert at the end
+    def append(self,value):
+        """Insert at the end.
 
         Args:
             value (object): Value to insert in linked list
@@ -37,7 +41,7 @@ class LinkedList:
 
 
     def push(self,value):
-        """Push ar the start after head
+        """Push at the begining.
 
         Args:
             value (object): Value to push to list
@@ -46,14 +50,15 @@ class LinkedList:
         if self.head is None:
             self.head = temp
         elif self.tail is None:
-            self.tail = temp
+            self.tail = self.head
+            self.head = temp
             self.head.next = self.tail
         else:
-            temp.next = self.head.next
-            self.head.next = temp
+            temp.next = self.head
+            self.head = temp
 
     def traverse(self):
-        """Traverse the linked list
+        """Traverse the linked list.
 
         Returns:
             node_values (list) : linked list values
@@ -66,6 +71,17 @@ class LinkedList:
 
         return node_values
 
+    def __len__(self):
+
+        size = 0
+        curr_node = self.head
+
+        while curr_node:
+            size += 1
+            curr_node = curr_node.next
+
+        return size
+
 
 if __name__ == "__main__":
     
@@ -75,7 +91,9 @@ if __name__ == "__main__":
         l_list.push("push"+str(i))
 
     for i in range(10):
-        l_list.insert("insert"+str(i))
+        l_list.append("insert"+str(i))
 
 
     print(l_list.traverse())
+
+    print(len(l_list))
