@@ -165,14 +165,17 @@ class BinaryTree:
         """Inorder traversal using stack
 
         Notes:
-            Algorithm
+            Algorithm 
+
                 1. Create an empty stack S.
                 2. Initialize current node as root
                 3. Push the current node to S and set current = current->left until current is NULL
-                4. If current is NULL and stack is not empty then 
-                    a. Pop the top item from stack.
-                    b. Print the popped item, set current = popped_item->right 
-                    c. Go to step 3.
+                4. If current is NULL and stack is not empty then
+
+                    4.1. Pop the top item from stack
+                    4.2. Print the popped item, set current = popped_item->right
+                    4.3. Go to step 3
+                    
                 5. If current is NULL and stack is empty then we are done.
 
         Returns:
@@ -311,28 +314,146 @@ class BinaryTree:
             BinaryTree._invert(node=node.right)
 
     def invert(self):
-        self._invert(node=self._root)
+        BinaryTree._invert(node=self._root)
 
 
     
+class BST:
+
+    def __init__(self) -> None:
+        self._root = None
+
+    @staticmethod
+    def _insert(node, val):
+        if node is None:
+            return Node(val)
+        else:
+            if node.data == val:
+                pass
+            elif node.data > val:
+                node.left = BST._insert(node=node.left,val=val)
+            else:
+                node.right = BST._insert(node=node.right,val=val)
+
+        return node
+
+    def insert(self, val):
+        self._root = BST._insert(self._root,val)
+
+    @staticmethod
+    def _inorder_traverse(node, data_arr = []):
+        if node is not None:
+
+            BST._inorder_traverse(node.left, data_arr)
+            data_arr.append(node.data)
+            BST._inorder_traverse(node.right, data_arr)
+            
+        return data_arr
+
+    @staticmethod
+    def _preorder_traverse(node, data_arr = []):
+        if node is not None:
+            data_arr.append(node.data)
+            BST._preorder_traverse(node.left, data_arr)
+            BST._preorder_traverse(node.right, data_arr)
+            
+        return data_arr
+
+    @staticmethod
+    def _postorder_traverse(node, data_arr = []):
+        if node is not None:
+            BST._postorder_traverse(node.left, data_arr)
+            BST._postorder_traverse(node.right, data_arr)
+            data_arr.append(node.data)
+            
+        return data_arr
+
+    
+
+    @staticmethod
+    def _level_order_traverse(node):
+        if node is None:
+            return []
+        else:
+            # actually this queue is working like a temp storage
+            # this temp storage will store nodes that needs to be processed in FIFO
+            # as we are talking about level order
+            # so it needs to go by this order
+            #                    
+            #                         root
+            #                      /       \
+            #                 left1         right1
+            #                /    \          /    \
+            #             left2   right2   left3   right3
+            # root -> left1 -> right1 -> left2 -> right2 -> left3 -> right3
+            # 
+            # queue's condition
+            # [] <- root
+            # [root]
+            # root <-[ left1 right1 ]
+            # left1 <- [ right1 left2 right2 ]
+            # right1 <- [ left2 right2 left3 right3 ]
+            # left2 <- [ right2 left3 right3 ]
+            # right2 <- [ left3 right3 ]
+            # left3 <- [ right3 ]
+            # right3 <- []
+        
+            queue = []
+            queue.append(node)
+
+            # we need one data array to store traversed data no
+            data_arr = []
+
+            # now run the loop until we reach to an empty queue
+            while len(queue):
+
+                # take the first element from the queue and add it in data_arr
+                # remove the element from queue but use it for left and right nodes iteration
+                curr_node = queue.pop(0)
+
+                data_arr.append(curr_node.data)
+                
+                if curr_node.left is not None: # adding left node to queue
+                    queue.append(curr_node.left)
+                
+                if curr_node.right is not None: # adding right node to queue
+                    queue.append(curr_node.right)
+            
+                # based on FIFO queue will process left node first 
+                # then the right node.
+            return data_arr
 
 
+    def traverse(self, order="level"):
+        
+        order = order.lower()
+
+        if order == "level":
+            return BST._level_order_traverse(node=self._root)
+        elif order == "in":
+            return BST._inorder_traverse(node=self._root)
+        elif order == "pre":
+            return BST._preorder_traverse(node=self._root)
+        elif order == "post":
+            return BST._postorder_traverse(node=self._root)
+        else:
+            pass
 
 if __name__ == "__main__":
 
-    tree = BinaryTree()
-    for i in range(1,7):
-        tree.insert(i)
+    # tree = BinaryTree()
+    # for i in range(1,7):
+    #     tree.insert(i)
 
 
-    print("height", tree.height)
+    # print("height", tree.height)
 
-    print("level", tree.traverse(order="level", method="stack"))
+    # print("level", tree.traverse(order="level", method="stack"))
 
-    tree.invert()
+    # tree.invert()
 
-    print("level", tree.traverse(order="level", method="stack"))
-    print("height", tree.height)
+    # print("level", tree.traverse(order="level", method="stack"))
+    # print("height", tree.height)
 
 
     # print("post", tree.traverse(order="post",method="stack"))
@@ -343,3 +464,12 @@ if __name__ == "__main__":
 
     # print("in", tree.traverse(order="in", method="stack"))
     # print("in", tree.traverse(order="in", method="recursion"))
+
+
+    bst = BST()
+
+    for i in [3,4,6,12,9,11,5]:
+        bst.insert(val=i)
+
+    print(bst.traverse(order="in"))
+    
