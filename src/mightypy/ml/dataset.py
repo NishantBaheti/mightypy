@@ -50,11 +50,11 @@ def generate_spiral_data(data_limit: int = 30, n_classes: int = 2,
             (np.cos(i/8) * i) + np.random.randn(), (np.sin(i/8) * i) + np.random.randn()
         ] for i in np.linspace(2, data_limit, n_samples_per_class)
     ])]
-    target = [np.ones(shape=(n_samples_per_class, 1), dtype=np.int32) * 1]
+    target = [np.ones(shape=(n_samples_per_class, 1), dtype=np.int32) * 0]
 
     for i in range(0, n_classes-1):
         features.append(features[-1] @ rotation_mat)
-        target.append(np.ones(shape=(n_samples_per_class, 1), dtype=np.int32) * i+2)
+        target.append(np.ones(shape=(n_samples_per_class, 1), dtype=np.int32) * i+1)
     X = np.vstack(features)
     y = np.vstack(target)
     return X, y
