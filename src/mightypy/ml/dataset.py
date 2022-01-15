@@ -12,7 +12,10 @@ def rotation_matrix_2d(theta: float) -> np.ndarray:
     """
     Create 2D data rotation matrix.
 
-    Reference article - https://en.wikipedia.org/wiki/Rotation_matrix
+    Reference article
+    ------------------
+    
+    https://en.wikipedia.org/wiki/Rotation_matrix
 
     Args:
         theta (float): angle for rotation.
