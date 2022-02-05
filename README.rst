@@ -1,13 +1,21 @@
 This is the documentation of **mightypy**.
 
+Description
+===========
+
+This package initially started with the idea of plotting live trend graph using matplotlib as base.
+
+visit https://graphpkg.readthedocs.io/ for detailed documentation
+
+
 Installation
 
-At the command line:
+from pypi:
 
-    .. note::
+.. note::
     pip install mightypy
 
-Or, if you have pip installed:
+Or, from github:
 
-    .. note::
+.. note::
     pip install git+https://github.com/nishantbaheti/mightypy
