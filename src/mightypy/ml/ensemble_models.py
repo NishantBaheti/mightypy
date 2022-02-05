@@ -3,7 +3,6 @@ Ensemble methods for Machine Learning
 """
 from __future__ import annotations
 from typing import Union, Tuple, List
-import warnings
 import numpy as np
 from mightypy.ml.tree_models import DecisionTreeClassifier, DecisionTreeRegressor
 

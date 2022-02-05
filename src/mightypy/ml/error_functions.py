@@ -2,9 +2,7 @@
 Cost functions of Machine Learning
 """
 
-from typing import Union
 import numpy as np
-from numpy.core.fromnumeric import resize
 
 
 def calculate_mse_cost(y_pred: np.ndarray, y: np.ndarray) -> float:
