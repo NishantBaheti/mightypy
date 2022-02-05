@@ -3,14 +3,13 @@ This is the documentation of **mightypy**.
 Description
 ===========
 
-This package initially started with the idea of plotting live trend graph using matplotlib as base.
+This package initially started with the idea of expanding mightiness of python with expermenting on data structures 
+and machine learning algorithms. 
 
-visit https://graphpkg.readthedocs.io/ for detailed documentation
+visit https://mightypy.readthedocs.io/ for detailed documentation
 
 
-Installation
-
-from pypi:
+Install from pypi:
 
 .. note::
     pip install mightypy
