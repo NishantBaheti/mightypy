@@ -6,8 +6,8 @@ import logging
 from typing import Union
 import numpy as np
 from mightypy import __version__
-from mightypy.ml.error_functions import calculate_mse_cost, calculate_entropy_cost
-from mightypy.ml.utils import sigmoid
+from mightypy.ml._error_fxs import calculate_mse_cost, calculate_entropy_cost
+from mightypy.ml._utils import sigmoid
 
 __author__ = "Nishant Baheti"
 __copyright__ = "Nishant Baheti"

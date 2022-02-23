@@ -31,7 +31,7 @@ def rotation_matrix_2d(theta: float) -> np.ndarray:
     return mat
 
 
-def generate_spiral_data(data_limit: int = 30, n_classes: int = 2,
+def spiral_data(data_limit: int = 30, n_classes: int = 2,
                          n_samples_per_class=300) -> Tuple[np.ndarray, np.ndarray]:
     """
     Generate spiral data for classification problem.
@@ -65,10 +65,12 @@ def generate_spiral_data(data_limit: int = 30, n_classes: int = 2,
 
 if __name__ == "__main__":
 
-    import seaborn as sns
-    import matplotlib.pyplot as plt
+    # import seaborn as sns
+    # import matplotlib.pyplot as plt
 
-    X, y = generate_spiral_data(n_classes=1)
+    # X, y = generate_spiral_data(n_classes=1)
 
-    sns.scatterplot(x=X[..., 0], y=X[..., 1], hue=y[..., 0], palette='dark')
-    plt.show()
+    # sns.scatterplot(x=X[..., 0], y=X[..., 1], hue=y[..., 0], palette='dark')
+    # plt.show()
+
+    pass

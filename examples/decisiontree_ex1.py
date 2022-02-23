@@ -1,5 +1,5 @@
 
-from mightypy.ml.tree_models import DecisionTreeClassifier,DecisionTreeRegressor
+from mightypy.ml import DecisionTreeClassifier,DecisionTreeRegressor
 from sklearn.datasets import load_iris,load_boston
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
