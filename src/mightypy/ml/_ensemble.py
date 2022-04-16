@@ -272,11 +272,12 @@ class AdaboostClassifier:
     """
     Adaboost Classification Model.
     
-    It is still under construction.
+    It is still under construction. DO NOT USE IT.
 
     .. _Adaboost: https://machinelearningexploration.readthedocs.io/en/latest/EnsembleMethods/ExploreBoosting.html#Adaboost-Classfication
     """
     def __init__(self, n_stumps:int, stump_depth:int=0):
+        print("DO not use this method. It is not tested.")
         self.stump_depth = stump_depth
         self._X= None
         self._y= None
@@ -289,7 +290,7 @@ class AdaboostClassifier:
         Amount of say.
 
         .. math::
-            amount of say = log(\frac{1 - TE}{TE})
+            \\text{amount of say} = \\frac{1}{2}(log(\\frac{1 - \\text{TE}}{\\text{TE}}))
 
         Args:
             total_err (Union[np.ndarray, float, int]): Total error from tree.
