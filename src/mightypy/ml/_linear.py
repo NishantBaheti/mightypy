@@ -21,7 +21,7 @@ class LinearRegression:
         iterations (int, optional): number of iteratons. Defaults to 10000.
 
     References:
-        TODO
+        https://machinelearningexploration.readthedocs.io/en/latest/LinearRegression/Explore.html
     """
 
     def __init__(self, alpha: float = 0.01, iterations: int = 10000):
@@ -243,6 +243,9 @@ class RidgeRegression:
     Args:
         alpha (float, optional): learning rate. Defaults to 0.01.
         iterations (int, optional): number of iteratons. Defaults to 10000.
+
+    References:
+        https://machinelearningexploration.readthedocs.io/en/latest/LinearRegression/Explore.html#Ridge(L2-Regularization)-Regression
     """
 
     def __init__(self, alpha: float = 0.01, iterations: int = 10000):
@@ -477,6 +480,9 @@ class LassoRegression:
     Args:
         alpha (float, optional): learning rate. Defaults to 0.01.
         iterations (int, optional): number of iteratons. Defaults to 10000.
+
+    References:
+        https://machinelearningexploration.readthedocs.io/en/latest/LinearRegression/Explore.html#Lasso(L1-Regularization)-Regression
     """
 
     def __init__(self, alpha: float = 0.01, iterations: int = 10000):
@@ -705,6 +711,9 @@ class LogisticRegression:
     Args:
         alpha (float, optional): [description]. Defaults to 0.01.
         iterations (int, optional): [description]. Defaults to 10000.
+
+    References:
+        https://machinelearningexploration.readthedocs.io/en/latest/LogisticRegression/Explore.html
     """
 
     def __init__(self, alpha: float = 0.01, iterations: int = 10000):

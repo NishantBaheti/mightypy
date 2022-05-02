@@ -62,7 +62,65 @@ def spiral_data(data_limit: int = 30, n_classes: int = 2,
     y = np.vstack(target)
     return X, y
 
+def sine_wave_from_sample(
+        n_samples: int, signal_freq: float, n_cycles: int = 10, amplitude: int = 1,
+        amp_shift: int = 0, phase_shift: int = 0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Sine wave generation with number of samples and signal frequency
 
+    Reference:
+        https://machinelearningexploration.readthedocs.io/en/latest/MathExploration/Fourier.html#Sine-wave
+
+    Args:
+        n_samples (int): number of samples.
+        signal_freq (float): signal frequency.
+        n_cycles (int, optional): number of cycles. Defaults to 10.
+        amplitude (int, optional): signal amplitude. Defaults to 1.
+        amp_shift (int, optional): amplitude shift. Defaults to 0.
+        phase_shift (int, optional): phase shift. Defaults to 0.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: signal wave, time, freq.
+    """
+    sampling_freq = (n_samples * signal_freq) / n_cycles
+    # n_samples = int((sampling_freq / signal_freq) * n_cycles)
+
+    t_step = 1 / sampling_freq
+    time = np.linspace(0, (n_samples-1) * t_step, n_samples)
+
+    f_step = sampling_freq / n_samples
+    freq = np.linspace(0, (n_samples-1) * f_step, n_samples)
+
+    wave = amp_shift + amplitude * \
+        np.sin((2 * np.pi * signal_freq * time) + phase_shift)
+
+    return wave, time, freq
+
+def sine_wave_from_timesteps(
+        signal_freq: float, time_step: float, amplitude: int = 1, amp_shift: int = 0,
+        phase_shift: int = 0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Sine wave generation with time steps and signal frequency
+
+    Args:
+        signal_freq (float): singal frequency.
+        time_step (float): time step.
+        amplitude (int, optional): amplitude. Defaults to 1.
+        amp_shift (int, optional): amplitude shift. Defaults to 0.
+        phase_shift (int, optional): phase shift. Defaults to 0.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: signal wave, time, freq.
+    """
+    time = np.arange(0, 1, time_step)
+    n = len(time)
+    freq = (1/(time_step * n)) * np.arange(n)
+
+    wave = amp_shift + amplitude * \
+        np.sin((2 * np.pi * signal_freq * time) + phase_shift)
+
+    return wave, time, freq
+        
 if __name__ == "__main__":
 
     # import seaborn as sns

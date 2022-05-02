@@ -2,7 +2,7 @@
 Ensemble methods for Machine Learning
 """
 from __future__ import annotations
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Optional
 import numpy as np
 from mightypy.ml._tree import DecisionTreeClassifier, DecisionTreeRegressor
 
@@ -20,7 +20,7 @@ class RandomForestClassifier:
         criteria (str, optional): criteria to calcualte information gain. Defaults to 'gini'.
     """
 
-    def __init__(self, num_of_trees: int = 25, min_features: int = None, max_depth: int = 50, min_samples_split: int = 2, criteria: str = 'gini') -> None:
+    def __init__(self, num_of_trees: int = 25, min_features: Optional[int] = None, max_depth: int = 50, min_samples_split: int = 2, criteria: str = 'gini') -> None:
         """constructor
         """
         self._X = None
