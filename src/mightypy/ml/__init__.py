@@ -19,7 +19,9 @@ from ._ensemble import (
 
 from ._utils import (
     moving_window_matrix,
-    sigmoid
+    sigmoid,
+    polynomial_regression,
+    trend
 )
 
 
@@ -34,5 +36,7 @@ __all__ = [
     "RandomForestClassifier",
     "RandomForestRegressor",
     "moving_window_matrix",
-    "sigmoid"
+    "sigmoid",
+    "polynomial_regression",
+    "trend"
 ]
