@@ -1,14 +1,42 @@
-import ._linear as linear_models
+from ._linear import (
+    LinearRegression,
+    LassoRegression,
+    RidgeRegression,
+    LogisticRegression,
+    polynomial_regression,
+    trend
+)
 
-import ._tree as tree_models
 
-import ._ensemble as ensemble_models
+from ._tree import (
+    DecisionTreeClassifier,
+    DecisionTreeRegressor
+)
 
-import ._utils as utilities 
+from ._ensemble import (
+    AdaboostClassifier,
+    RandomForestClassifier,
+    RandomForestRegressor,
+)
+
+from ._utils import (
+    moving_window_matrix,
+    sigmoid
+)
+
 
 __all__ = [
-    "linear_models",
-    "tree_models",
-    "ensemble_models",
-    "utilities"
+    "LinearRegression",
+    "LassoRegression",
+    "RidgeRegression",
+    "LogisticRegression",
+    "polynomial_regression",
+    "trend",
+    "DecisionTreeClassifier",
+    "DecisionTreeRegressor",
+    "AdaboostClassifier",
+    "RandomForestClassifier",
+    "RandomForestRegressor",
+    "moving_window_matrix",
+    "sigmoid"
 ]

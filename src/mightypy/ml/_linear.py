@@ -2,7 +2,6 @@
 Linear Models of Machine Learning
 """
 
-import logging
 from typing import Union, Tuple
 import numpy as np
 from mightypy import __version__
@@ -943,7 +942,6 @@ class LogisticRegression:
 
         else:
             print("No Method Defined.")
-
 
 
 def polynomial_regression(x: np.ndarray, y: np.ndarray, degree: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
