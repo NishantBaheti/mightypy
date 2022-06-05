@@ -1,4 +1,3 @@
-from itertools import count
 from typing import Callable, Tuple, Optional
 import numpy as np
 import pandas as pd
@@ -32,6 +31,16 @@ def woe_and_iv(df: pd.DataFrame, event: str, non_event: str, target_col: str, bu
 
     Returns:
         Tuple[ pd.DataFrame, float]: calculated dataframe with weight of evidence, Information Value.
+
+    Examples:
+        >>> from sklearn.datasets import load_breast_cancer
+        >>> from mightypy.stats import woe_and_iv 
+        >>> dataset = load_breast_cancer(as_frame=True)
+        >>> df = dataset.frame[['mean radius', 'target']]
+        >>> target_map = {0: 'False', 1: 'True'}
+        >>> df['label'] = df['target'].map(target_map)
+        >>> cal_df, iv = woe_and_iv(df, event='True', non_event='False', target_col='label',
+        >>>                         bucket_col='mean radius')
     """
     if value_col is None:
         value_col = 'values'
