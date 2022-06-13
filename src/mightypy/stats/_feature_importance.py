@@ -13,7 +13,6 @@ def woe_and_iv(df: pd.DataFrame, event: str, non_event: str, target_col: str, bu
     -----------
         https://www.listendata.com/2015/03/weight-of-evidence-woe-and-information.html
 
-
     Args:
         df (pd.DataFrame): Input pandas dataframe.
         event (str): event name. Generally label true/1.
@@ -30,7 +29,7 @@ def woe_and_iv(df: pd.DataFrame, event: str, non_event: str, target_col: str, bu
         NotImplementedError: If bucket column type is not 'continuous' or 'discrete'.
 
     Returns:
-        Tuple[ pd.DataFrame, float]: calculated dataframe with weight of evidence, Information Value.
+        Tuple[pd.DataFrame, float]: calculated dataframe with weight of evidence, Information Value.
 
     Examples:
         >>> from sklearn.datasets import load_breast_cancer
