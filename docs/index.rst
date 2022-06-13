@@ -10,13 +10,11 @@ Contents
 ========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
-   Contributions & Help <contributing>
+   Modules <api/mightypy>
    License <license>
    Authors <authors>
-   Changelog <changelog>
-   Module Reference <api/modules>
 
 
 Indices and tables

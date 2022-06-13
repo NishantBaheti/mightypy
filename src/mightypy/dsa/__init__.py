@@ -1,3 +1,8 @@
+""" 
+mightypy.dsa
+==============
+"""
+
 from ._linked_list import (
     LinkedList
 )

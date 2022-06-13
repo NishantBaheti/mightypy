@@ -1,3 +1,9 @@
+"""
+mightypy.make
+===============
+"""
+
+
 from ._dataset import (
     spiral_data,
     rotation_matrix_2d,

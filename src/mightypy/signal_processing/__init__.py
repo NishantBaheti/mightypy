@@ -1,3 +1,9 @@
+"""
+mightypy.signal_processing
+============================
+
+"""
+
 from ._fft import (
     DenoiseFFT
 )

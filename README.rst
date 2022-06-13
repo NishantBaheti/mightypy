@@ -8,13 +8,14 @@ and machine learning algorithms.
 
 visit https://mightypy.readthedocs.io/ for detailed documentation
 
-
 Install from pypi:
 
-.. note::
-    pip install mightypy
+.. code-block::
+
+    $ pip install -U mightypy
 
 Or, from github:
 
-.. note::
-    pip install git+https://github.com/nishantbaheti/mightypy
+.. code-block::
+
+    $ pip install git+https://github.com/nishantbaheti/mightypy

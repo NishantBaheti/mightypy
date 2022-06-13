@@ -1,3 +1,8 @@
+"""
+mightypy.ml
+=============
+"""
+
 from ._linear import (
     LinearRegression,
     LassoRegression,
