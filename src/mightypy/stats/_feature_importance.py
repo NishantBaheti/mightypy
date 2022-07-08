@@ -2,19 +2,17 @@ from typing import Callable, Tuple, Optional
 import numpy as np
 import pandas as pd
 
+import matplotlib.pyplot as plt
 
-def woe_and_iv(df: pd.DataFrame, event: str, non_event: str, target_col: str, bucket_col: str,
-               value_col: Optional[str] = None, agg_func: Callable = np.count_nonzero, bucket_col_type: str = 'continuous',
-               n_buckets: int = 10) -> Tuple[pd.DataFrame, float]:
+
+class WOE_IV:
     """
     Weight of Evidence and Information Value.
 
     References:
-    -----------
         https://www.listendata.com/2015/03/weight-of-evidence-woe-and-information.html
 
     Args:
-        df (pd.DataFrame): Input pandas dataframe.
         event (str): event name. Generally label true/1.
         non_event (str): non event name. Generally label false/0.
         target_col (str): Target column name.
@@ -34,56 +32,200 @@ def woe_and_iv(df: pd.DataFrame, event: str, non_event: str, target_col: str, bu
     Examples:
         >>> from sklearn.datasets import load_breast_cancer
         >>> from mightypy.stats import woe_and_iv 
+
         >>> dataset = load_breast_cancer(as_frame=True)
         >>> df = dataset.frame[['mean radius', 'target']]
         >>> target_map = {0: 'False', 1: 'True'}
         >>> df['label'] = df['target'].map(target_map)
-        >>> cal_df, iv = woe_and_iv(df, event='True', non_event='False', target_col='label',
-        >>>                         bucket_col='mean radius')
+        
+        >>> obj = WOE_IV(event='True', non_event='False', target_col='label',
+        >>>              bucket_col='mean radius')
+
+        >>> cal_df, iv = obj.values(df)
+        >>> fig = obj.plot()
+        >>> fig.tight_layout()
+        >>> fig.show()
+
+        or directly 
+        >>> fig, ax = obj.plot(df)
+        >>> fig.show()
     """
-    if value_col is None:
-        value_col = 'values'
-        df.insert(loc=0, column=value_col, value='x')
-    df = df[[target_col, value_col, bucket_col]].copy()
-    bucket_col_name: str = f'buckets_{bucket_col}'
-    perc_event_col_name: str = f'%_event_{event}'
-    perc_non_event_col_name: str = f'%_non_event_{non_event}'
+    def __init__(self, event: str, non_event: str, target_col: str, bucket_col: str,
+                 value_col: Optional[str] = None, agg_func: Callable = np.count_nonzero,
+                 bucket_col_type: str = 'continuous', n_buckets: int = 10):
+        self._event = event
+        self._non_event = non_event
+        self._target_col = target_col
+        self._bucket_col = bucket_col
+        self._bucket_col_name = f'buckets_{bucket_col}'
+        self._value_col = value_col
+        self._agg_func = agg_func
+        self._bucket_col_type = bucket_col_type
+        self._n_buckets = n_buckets
+        self._perc_event_col_name: str = f'%_event_{event}'
+        self._perc_non_event_col_name: str = f'%_non_event_{non_event}'
+        self._df: pd.DataFrame = None
+        self._cal_df: pd.DataFrame = None
+        self._iv: float = None
 
-    if bucket_col_type == 'continuous':
-        quantiles = np.linspace(0, 1, n_buckets+1)
-        df.insert(loc=0, column=bucket_col_name,
-                  value=pd.qcut(df[bucket_col].values, q=quantiles, duplicates='raise', retbins=False))
-    elif bucket_col_type == 'discrete':
-        df.insert(loc=0, column=bucket_col_name, value=df[bucket_col])
-    else:
-        raise NotImplementedError
+    def _calculate(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, float]:
+        """
+        Calculations for weight of evidence and information value.
 
-    cal_df = pd.pivot_table(df, index=[bucket_col_name], columns=[target_col],
-                            values=value_col, aggfunc=agg_func)
+        _extended_summary_
 
-    cal_df.fillna(value=0, inplace=True)
+        Args:
+            df (pd.DataFrame): input dataframe with said values.
 
-    cal_df[['adj_event', 'adj_non_event']] = cal_df[[event,non_event]]\
-        .apply(lambda x: (x+0.5) if (x[0] == 0 or x[1] == 0) else x, axis=1)
+        Raises:
+            NotImplementedError: if bucketing method is not implemented.
 
-    event_sum = cal_df[event].sum()
-    cal_df[perc_event_col_name] = cal_df['adj_event'] / event_sum
+        Returns:
+            Tuple[pd.DataFrame, float]: calculated dataframe and information value.
+        """
+        self._df = df
 
-    non_event_sum = cal_df[non_event].sum()
-    cal_df[perc_non_event_col_name] = cal_df['adj_non_event'] / non_event_sum
+        if self._value_col is None:
+            self._value_col = 'values'
+            self._df.insert(loc=0, column=self._value_col, value='x')
 
-    cal_df['woe'] = np.log(
-        cal_df[perc_non_event_col_name] / cal_df[perc_event_col_name]
-    )
+        if self._bucket_col_type == 'continuous':
+            quantiles = np.linspace(0, 1, self._n_buckets+1)
+            self._df.insert(
+                loc=0,
+                column=self._bucket_col_name,
+                value=pd.qcut(self._df[self._bucket_col].values, q=quantiles, duplicates='raise',
+                              retbins=False)
+            )
+        elif self._bucket_col_type == 'discrete':
+            self._df.insert(loc=0, column=self._bucket_col_name,
+                            value=df[self._bucket_col])
+        else:
+            raise NotImplementedError
 
-    cal_df['iv'] = (
-        cal_df[perc_non_event_col_name] -
-        cal_df[perc_event_col_name]
-    ) * cal_df['woe']
+        self._cal_df = pd.pivot_table(self._df, index=[self._bucket_col_name], columns=[self._target_col],
+                                      values=self._value_col, aggfunc=self._agg_func)
 
-    iv: float = cal_df['iv'].sum()
-    return cal_df, iv
+        self._cal_df.fillna(value=0, inplace=True)
+
+        self._cal_df[['adj_event', 'adj_non_event']] = self._cal_df[
+            [self._event, self._non_event]].apply(lambda x: (x+0.5) if (x[0] == 0 or x[1] == 0) else x, axis=1)
+
+        event_sum = self._cal_df[self._event].sum()
+        self._cal_df[self._perc_event_col_name] = self._cal_df['adj_event'] / event_sum
+
+        non_event_sum = self._cal_df[self._non_event].sum()
+        self._cal_df[self._perc_non_event_col_name] = self._cal_df['adj_non_event'] / non_event_sum
+
+        self._cal_df['woe'] = np.log(
+            self._cal_df[self._perc_non_event_col_name] /
+            self._cal_df[self._perc_event_col_name]
+        )
+
+        self._cal_df['iv'] = (
+            self._cal_df[self._perc_non_event_col_name] -
+            self._cal_df[self._perc_event_col_name]
+        ) * self._cal_df['woe']
+
+        self._iv: float = self._cal_df['iv'].sum()
+        return self._cal_df, self._iv
+
+    def values(self, df: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, float]:
+        """
+        Returns weight of evidence and information value for given dataframe.
+
+        Args:
+            df (Optional[pd.DataFrame], optional): Input dataframe. Defaults to None.
+
+        Raises:
+            ValueError: If input dataframe does not exist either in the model or in method
+                        input args.
+
+        Returns:
+            Tuple[pd.DataFrame, float]: calculated dataframe and information value.
+        """
+        if self._iv is None or self._cal_df is None:
+            if df is None:
+                if self._df is None:
+                    raise ValueError(
+                        "dataframe doesn't exist. Please insert dataframe.")
+                else:
+                    self._calculate(self._df)
+            else:
+                self._calculate(df)
+        return self._cal_df, self._iv
+
+    def plot(self, df: Optional[pd.DataFrame] = None, figsize=(15, 7)) -> plt.Figure:
+        """
+        Plot weight of evidence and subsequent plots.
+
+        Args:
+            df (Optional[pd.DataFrame], optional): Input dataframe. Defaults to None.
+            figsize (tuple, optional): Figure size. Defaults to (15, 7).
+
+        Raises:
+            ValueError: If dataframe doesn't exist either in the model or in method args.
+
+        Returns:
+            plt.Figure: matplotlib figure.
+        """
+
+        if self._iv is None or self._cal_df is None:
+            if df is None:
+                if self._df is None:
+                    raise ValueError(
+                        "dataframe doesn't exist. Please insert dataframe.")
+                else:
+                    self._calculate(self._df)
+            else:
+                self._calculate(df)
+
+        idxs = self._cal_df.index.astype(str)
+        ranges = np.arange(0, self._n_buckets, step=1)
+
+        fig, _ax = plt.subplots(1, 2, figsize=figsize)
+        _ax[0].set_xlim(left=self._cal_df['woe'].min() - 2,
+                        right=self._cal_df['woe'].max() + 2)
+        _ax[0].barh(y=idxs, width=self._cal_df['woe'], color='blue', alpha=0.6)
+        for i in _ax[0].containers:
+            _ax[0].bar_label(i, fmt='%.3f', padding=5)
+        _ax[0].grid()
+        _ax[0].set_xlabel(None)
+        _ax[0].set_ylabel(None)
+        _ax[0].set_title('Weight Of Evidence')
+
+        _ax[1].barh(y=ranges-0.2, width=self._cal_df[self._event],
+                    color='green', alpha=0.6, label=self._event, height=0.4)
+        _ax[1].barh(y=ranges+0.2, width=self._cal_df[self._non_event],
+                    color='red', alpha=0.6, label=self._non_event, height=0.4)
+        _ax[1].set_yticks(ranges)
+        _ax[1].set_yticklabels(idxs)
+        for i in _ax[1].containers:
+            _ax[1].bar_label(i, fmt='%.0f', padding=5)
+        _ax[1].grid()
+        _ax[1].set_ylabel(None)
+        _ax[1].legend(loc='upper left')
+
+        fig.suptitle(f"""
+                        {self._bucket_col}
+                 ===================================
+                    
+                  Information Value  : {self._iv:.3f}
+        """)
+        return fig
 
 
 if __name__ == "__main__":
-    pass
+    from sklearn.datasets import load_breast_cancer
+
+    # plt.style.use('seaborn')
+    dataset = load_breast_cancer(as_frame=True)
+    df = dataset.frame[['mean radius', 'target']]
+    target_map = {0: 'False', 1: 'True'}
+    df['label'] = df['target'].map(target_map)
+    model = WOE_IV(event='True', non_event='False',
+                   target_col='label', bucket_col='mean radius')
+
+    fig = model.plot(df)
+    fig.tight_layout()
+    plt.show()
