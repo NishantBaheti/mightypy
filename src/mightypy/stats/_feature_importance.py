@@ -1,3 +1,9 @@
+""" 
+Feature Importance Methods
+-----------------------------
+
+"""
+
 from typing import Callable, Tuple, Optional
 import numpy as np
 import pandas as pd
@@ -23,12 +29,6 @@ class WOE_IV:
                                             Defaults to 'continuous'.
         n_buckets (int, optional): If bucket column has continuous values then create aritificial buckets. Defaults to 10.
 
-    Raises:
-        NotImplementedError: If bucket column type is not 'continuous' or 'discrete'.
-
-    Returns:
-        Tuple[pd.DataFrame, float]: calculated dataframe with weight of evidence, Information Value.
-
     Examples:
         >>> from sklearn.datasets import load_breast_cancer
         >>> from mightypy.stats import woe_and_iv 
@@ -37,7 +37,7 @@ class WOE_IV:
         >>> df = dataset.frame[['mean radius', 'target']]
         >>> target_map = {0: 'False', 1: 'True'}
         >>> df['label'] = df['target'].map(target_map)
-        
+
         >>> obj = WOE_IV(event='True', non_event='False', target_col='label',
         >>>              bucket_col='mean radius')
 
@@ -51,6 +51,7 @@ class WOE_IV:
         >>> fig, ax = obj.plot(df)
         >>> fig.show()
     """
+
     def __init__(self, event: str, non_event: str, target_col: str, bucket_col: str,
                  value_col: Optional[str] = None, agg_func: Callable = np.count_nonzero,
                  bucket_col_type: str = 'continuous', n_buckets: int = 10):
@@ -79,7 +80,7 @@ class WOE_IV:
             df (pd.DataFrame): input dataframe with said values.
 
         Raises:
-            NotImplementedError: if bucketing method is not implemented.
+           NotImplementedError: If bucket column type is not 'continuous' or 'discrete'.
 
         Returns:
             Tuple[pd.DataFrame, float]: calculated dataframe and information value.
@@ -196,9 +197,9 @@ class WOE_IV:
         _ax[0].set_title('Weight Of Evidence')
 
         _ax[1].barh(y=ranges-0.2, width=self._cal_df[self._event],
-                    color='green', alpha=0.6, label=self._event, height=0.4)
+                    color='red', alpha=0.6, label=self._event, height=0.4)
         _ax[1].barh(y=ranges+0.2, width=self._cal_df[self._non_event],
-                    color='red', alpha=0.6, label=self._non_event, height=0.4)
+                    color='green', alpha=0.6, label=self._non_event, height=0.4)
         _ax[1].set_yticks(ranges)
         _ax[1].set_yticklabels(idxs)
         for i in _ax[1].containers:
@@ -209,7 +210,7 @@ class WOE_IV:
 
         fig.suptitle(f"""
                         {self._bucket_col}
-                 ===================================
+                =======================================
                     
                   Information Value  : {self._iv:.3f}
         """)

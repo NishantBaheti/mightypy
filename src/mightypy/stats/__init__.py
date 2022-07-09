@@ -1,7 +1,6 @@
 """
 mightypy.stats
 ================
-
 """
 
 from ._feature_importance import WOE_IV
