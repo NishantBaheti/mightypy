@@ -74,8 +74,6 @@ class WOE_IV:
         """
         Calculations for weight of evidence and information value.
 
-        _extended_summary_
-
         Args:
             df (pd.DataFrame): input dataframe with said values.
 
@@ -85,11 +83,12 @@ class WOE_IV:
         Returns:
             Tuple[pd.DataFrame, float]: calculated dataframe and information value.
         """
-        self._df = df
-
         if self._value_col is None:
             self._value_col = 'values'
+            self._df = df[[self._target_col, self._bucket_col]].copy()
             self._df.insert(loc=0, column=self._value_col, value='x')
+        else:
+            self._df = df[[self._target_col, self._bucket_col, self._value_col]].copy()
 
         if self._bucket_col_type == 'continuous':
             quantiles = np.linspace(0, 1, self._n_buckets+1)
@@ -233,3 +232,5 @@ if __name__ == "__main__":
     plt.show()
 
     print(model.values())
+
+    print(df)
