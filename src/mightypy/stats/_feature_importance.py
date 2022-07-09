@@ -47,6 +47,7 @@ class WOE_IV:
         >>> fig.show()
 
         or directly 
+
         >>> fig, ax = obj.plot(df)
         >>> fig.show()
     """
@@ -229,3 +230,5 @@ if __name__ == "__main__":
     fig = model.plot(df)
     fig.tight_layout()
     plt.show()
+
+    print(model.values())
