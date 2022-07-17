@@ -966,9 +966,14 @@ def polynomial_regression(x: np.ndarray, y: np.ndarray, degree: int) -> Tuple[np
         >>> plt.legend()
         >>> plt.show()
     """
-    a = np.polyfit(x, y, degree)
-    slope = a[:-1]
-    resid = a[-1:]
+    a = np.polynomial.Polynomial.fit(x, y, deg=degree).convert().coef
+    
+    if len(a) == 1:
+        slope = a
+        resid = np.array([0])
+    else:
+        slope = a[1:]
+        resid = a[0]
     fit_line = np.array([(x**(degree - i))*slope[i]
                      for i in range(0, degree)]).sum(axis=0) + resid
     return slope, resid, fit_line
@@ -999,24 +1004,25 @@ def trend(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndar
 
 
 if __name__ == "__main__":
-    # import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
+    import matplotlib
 
-    # x = np.array([1, 2, 3, 4, 5, 6, 7, 8])
-    # y = np.array([1, 2, 3, 3, 4, 5, 7, 10])
-    # s, r, t = trend(x, y)
-    # plt.plot(x, y, 'o', label='original')
-    # plt.plot(x, t, '.-',  label='regression line')
-    # plt.legend()
-    # plt.show()
+    x = np.array([1, 2, 3, 4, 5, 6, 7, 8])
+    y = np.array([1, 2, 3, 3, 4, 5, 7, 10])
+    s, r, t = trend(x, y)
+    plt.plot(x, y, 'o', label='original', alpha=0.6)
+    plt.plot(x, t, '.-',  label='regression line')
+    plt.legend()
+    plt.show(block=True)
 
 
-    # x = np.arange(-10, 10)
-    # y = x**2 + x**3
-    # s, r, l = polynomial_regression(x, y, 3)
+    x = np.arange(1, 10)
+    y = x**2 + x**3
+    s, r, l = polynomial_regression(x, y, 1)
 
-    # plt.plot(x, y, 'ko', label='original')
-    # plt.plot(x, l, '.-',  label='regression line')
-    # plt.legend()
-    # plt.show()
+    plt.plot(x, y, 'ko', label='original', alpha=0.6)
+    plt.plot(x, l, '.-',  label='regression line')
+    plt.legend()
+    plt.show()
 
-    pass
+    # pass
