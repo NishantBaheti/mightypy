@@ -31,7 +31,7 @@ class WOE_IV:
 
     Examples:
         >>> from sklearn.datasets import load_breast_cancer
-        >>> from mightypy.stats import woe_and_iv 
+        >>> from mightypy.stats import WOE_IV 
 
         >>> dataset = load_breast_cancer(as_frame=True)
         >>> df = dataset.frame[['mean radius', 'target']]
