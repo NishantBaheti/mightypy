@@ -34,13 +34,13 @@ class RandomForestClassifier:
         self.min_samples_split = min_samples_split
         self.criteria = criteria
 
-    def _sampling(self) -> Tuple[List[int], List[int]]:
+    def _sampling(self) -> Tuple[np.ndarray, np.ndarray]:
         """sampling function
 
         Returns:
-            Tuple[List[int],List[int]]: sampling idxs for rows nad columns for feature and target matrix.
+            Tuple[np.ndarray, np.ndarray]: sampling idxs for rows nad columns for feature and target matrix.
         """
-        m, n = self._X.shape
+        m, n = self._X.shape  # type: ignore
 
         # sampling with replacement
         # means rows with repeat in the data
@@ -56,7 +56,8 @@ class RandomForestClassifier:
         feat_idxs = np.random.choice(n, size=size, replace=False)
         return idxs, feat_idxs
 
-    def train(self, X: Union[np.ndarray, list], y: Union[np.ndarray, list], feature_name: list = None, target_name: list = None) -> None:
+    def train(self, X: Union[np.ndarray, list], y: Union[np.ndarray, list], feature_name: Optional[list] = None, 
+                target_name: Optional[list] = None) -> None:
         """Train the model
 
         Args:
@@ -143,7 +144,7 @@ class RandomForestClassifier:
 
             all_tree_results = np.concatenate(np.array(results, dtype='O'), axis=1)
             final_results = np.apply_along_axis(
-                func1d=self._get_max_result, axis=1, arr=all_tree_results).reshape(-1, 1)
+                func1d=self._get_max_result, axis=1, arr=all_tree_results).reshape(-1, 1) # type: ignore
             return final_results
         else:
             raise ValueError("X should be list or numpy array")
@@ -162,7 +163,8 @@ class RandomForestRegressor:
         criteria (str, optional): criteria to calcualte information gain. Defaults to 'gini'.
     """
 
-    def __init__(self, num_of_trees: int = 25, min_features: Opional[int] = None, max_depth: int = 30, min_samples_split: int = 3, criteria: str = 'variance') -> None:
+    def __init__(self, num_of_trees: int = 25, min_features: Optional[int] = None, max_depth: int = 30, 
+                min_samples_split: int = 3, criteria: str = 'variance') -> None:
         self._X = None
         self._y = None
         self._feature_names = None
@@ -174,13 +176,13 @@ class RandomForestRegressor:
         self.min_samples_split = min_samples_split
         self.criteria = criteria
 
-    def _sampling(self) -> Tuple[List[int], List[int]]:
+    def _sampling(self) -> Tuple[np.ndarray, np.ndarray]:
         """sampling function
 
         Returns:
-            Tuple[List[int],List[int]]: sampling idxs for rows nad columns for feature and target matrix.
+            Tuple[np.ndarray, np.ndarray]: sampling idxs for rows nad columns for feature and target matrix.
         """
-        m, n = self._X.shape
+        m, n = self._X.shape # type: ignore
 
         # sampling with replacement
         # means rows with repeat in the data
@@ -196,7 +198,8 @@ class RandomForestRegressor:
         feat_idxs = np.random.choice(n, size=size, replace=False)
         return idxs, feat_idxs
 
-    def train(self, X: Union[np.ndarray, list], y: Union[np.ndarray, list], feature_name: list = None, target_name: list = None) -> None:
+    def train(self, X: Union[np.ndarray, list], y: Union[np.ndarray, list], feature_name: Optional[list] = None, 
+                target_name: Optional[list] = None) -> None:
         """Train the model
 
         Args:
@@ -359,7 +362,8 @@ class AdaboostClassifier:
 
         return results
 
-    def train(self, X:np.ndarray, y:np.ndarray, feature_names:list=None, target_name:list=None):
+    def train(self, X:np.ndarray, y:np.ndarray, feature_names:Optional[list]=None, 
+                target_name:Optional[list]=None):
         """
         Train the model.
 
@@ -412,7 +416,7 @@ class AdaboostClassifier:
                 print("early stopping as total error is <= 0", total_err)
                 break
 
-            aos = self.amount_of_say(total_err)
+            aos: float = self.amount_of_say(total_err) # type: ignore
             
             if aos <= 0.0:
                 print("early stopping as amount of say is <= 0", aos)

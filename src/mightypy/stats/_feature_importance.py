@@ -66,9 +66,9 @@ class WOE_IV:
         self._n_buckets = n_buckets
         self._perc_event_col_name: str = f'%_event_{event}'
         self._perc_non_event_col_name: str = f'%_non_event_{non_event}'
-        self._df: pd.DataFrame = None
-        self._cal_df: pd.DataFrame = None
-        self._iv: float = None
+        self._df: pd.DataFrame = None  # type: ignore
+        self._cal_df: pd.DataFrame = None  # type: ignore
+        self._iv: float = None  # type: ignore
 
     def _calculate(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, float]:
         """
@@ -156,13 +156,13 @@ class WOE_IV:
                 self._calculate(df)
         return self._cal_df, self._iv
 
-    def plot(self, df: Optional[pd.DataFrame] = None, figsize=(15, 7)) -> plt.Figure:
+    def plot(self, df: Optional[pd.DataFrame] = None, figsize=(10, 5)) -> plt.Figure:  # type: ignore
         """
         Plot weight of evidence and subsequent plots.
 
         Args:
             df (Optional[pd.DataFrame], optional): Input dataframe. Defaults to None.
-            figsize (tuple, optional): Figure size. Defaults to (15, 7).
+            figsize (tuple, optional): Figure size. Defaults to (10, 5).
 
         Raises:
             ValueError: If dataframe doesn't exist either in the model or in method args.
@@ -185,52 +185,55 @@ class WOE_IV:
         ranges = np.arange(0, self._n_buckets, step=1)
 
         fig, _ax = plt.subplots(1, 2, figsize=figsize)
-        _ax[0].set_xlim(left=self._cal_df['woe'].min() - 2,
+        _ax[0].set_xlim(left=self._cal_df['woe'].min() - 2,  # type: ignore
                         right=self._cal_df['woe'].max() + 2)
-        _ax[0].barh(y=idxs, width=self._cal_df['woe'], color='blue', alpha=0.6)
-        for i in _ax[0].containers:
-            _ax[0].bar_label(i, fmt='%.3f', padding=5)
-        _ax[0].grid()
-        _ax[0].set_xlabel(None)
-        _ax[0].set_ylabel(None)
-        _ax[0].set_title('Weight Of Evidence')
+        _ax[0].barh(y=idxs, width=self._cal_df['woe'], # type: ignore
+                    color='blue', alpha=0.6)  # type: ignore
+        for i in _ax[0].containers:  # type: ignore
+            _ax[0].bar_label(i, fmt='%.3f', padding=5)  # type: ignore
+        _ax[0].grid(alpha=0.2)  # type: ignore
+        _ax[0].set_xlabel(None)  # type: ignore
+        _ax[0].set_ylabel(None)  # type: ignore
+        _ax[0].set_title('Weight Of Evidence')  # type: ignore
 
-        _ax[1].barh(y=ranges-0.2, width=self._cal_df[self._event],
+        _ax[1].barh(y=ranges-0.2, width=self._cal_df[self._event],  # type: ignore
                     color='red', alpha=0.6, label=self._event, height=0.4)
-        _ax[1].barh(y=ranges+0.2, width=self._cal_df[self._non_event],
+        _ax[1].barh(y=ranges+0.2, width=self._cal_df[self._non_event],  # type: ignore
                     color='green', alpha=0.6, label=self._non_event, height=0.4)
-        _ax[1].set_yticks(ranges)
-        _ax[1].set_yticklabels(idxs)
-        for i in _ax[1].containers:
-            _ax[1].bar_label(i, fmt='%.0f', padding=5)
-        _ax[1].grid()
-        _ax[1].set_ylabel(None)
-        _ax[1].legend(loc='upper left')
+        _ax[1].set_yticks(ranges)  # type: ignore
+        _ax[1].set_yticklabels(idxs)  # type: ignore
+        for i in _ax[1].containers:  # type: ignore
+            _ax[1].bar_label(i, fmt='%.0f', padding=5)  # type: ignore
+        _ax[1].grid(alpha=0.2)  # type: ignore
+        _ax[1].set_ylabel(None)  # type: ignore
+        _ax[1].set_title('Deciles')  # type: ignore
+        _ax[1].legend(bbox_to_anchor=(1.5, 1), loc='upper right')  # type: ignore
 
         fig.suptitle(f"""
                         {self._bucket_col}
                 =======================================
-                    
                   Information Value  : {self._iv:.3f}
-        """)
+                ---------------------------------------
+        """, fontsize=12)
         return fig
 
 
 if __name__ == "__main__":
-    from sklearn.datasets import load_breast_cancer
+    # from sklearn.datasets import load_breast_cancer
 
     # plt.style.use('seaborn')
-    dataset = load_breast_cancer(as_frame=True)
-    df = dataset.frame[['mean radius', 'target']]
-    target_map = {0: 'False', 1: 'True'}
-    df['label'] = df['target'].map(target_map)
-    model = WOE_IV(event='True', non_event='False',
-                   target_col='label', bucket_col='mean radius')
+    # dataset = load_breast_cancer(as_frame=True)
+    # df = dataset.frame[['mean radius', 'target']]
+    # target_map = {0: 'False', 1: 'True'}
+    # df['label'] = df['target'].map(target_map)
 
-    fig = model.plot(df)
-    fig.tight_layout()
-    plt.show()
+    # model = WOE_IV(event='True', non_event='False',
+    #                target_col='label', bucket_col='mean radius')
 
-    print(model.values())
+    # fig = model.plot(df)
+    # fig.tight_layout()
+    # plt.show()
 
-    print(df)
+    # print(model.values())
+
+    pass

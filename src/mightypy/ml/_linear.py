@@ -175,7 +175,7 @@ class LinearRegression:
                 new_theta = None
 
                 # simultaneous operation
-                gradient = np.mean((y_pred - self._y) * self._X, axis=0)
+                gradient = np.mean((y_pred - self._y) * self._X, axis=0)  # type: ignore
                 new_theta = self._theta - (self.alpha * gradient)
 
                 if np.isnan(np.sum(new_theta)) or np.isinf(np.sum(new_theta)):
@@ -213,7 +213,7 @@ class LinearRegression:
                 new_theta = None
 
                 # simultaneous operation
-                gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)
+                gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)  # type: ignore
                 new_theta = self._theta - (self.alpha * gradient)
 
                 if np.isnan(np.sum(new_theta)) or np.isinf(np.sum(new_theta)):
@@ -402,13 +402,12 @@ class RidgeRegression:
                 # simultaneous operation
                 ######################################################
 
-                gradient = np.mean((y_pred - self._y) * self._X, axis=0)
+                gradient = np.mean((y_pred - self._y) * self._X, axis=0)  # type: ignore
 
                 # theta_0 will not be effected by penalty
-                new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])
+                new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])  # type: ignore
                 # rest of theta's will be effected by it
-                new_theta_rest = self._theta[:, range(
-                    1, self._n)] * (1 - (penalty/self._m)) - (self.alpha * gradient[1:])
+                new_theta_rest = self._theta[:, range(1, self._n)] * (1 - (penalty/self._m)) - (self.alpha * gradient[1:]) # type: ignore
 
                 new_theta = np.hstack((new_theta_0, new_theta_rest))
 
@@ -445,9 +444,9 @@ class RidgeRegression:
                 new_theta = None
 
                 # simultaneous operation
-                gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)
-                new_theta_0 = self._theta[:,[0]] - (self.alpha * gradient[0])
-                new_theta_rest = self._theta[:,range(1,self._n)] * (1 - (penalty/self._m) ) - (self.alpha * gradient[1:])
+                gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)  # type: ignore
+                new_theta_0 = self._theta[:,[0]] - (self.alpha * gradient[0])  # type: ignore
+                new_theta_rest = self._theta[:,range(1,self._n)] * (1 - (penalty/self._m) ) - (self.alpha * gradient[1:]) # type: ignore
 
                 new_theta = np.hstack((new_theta_0,new_theta_rest))
 
@@ -638,10 +637,9 @@ class LassoRegression:
                 # simultaneous operation
                 ################################################################################################################
 
-                gradient = np.mean((y_pred - self._y) * self._X, axis=0)
-                new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])
-                new_theta_rest = self._theta[:, range(
-                    1, self._n)] - (self.alpha * gradient[1:]) - (penalty/self._m)
+                gradient = np.mean((y_pred - self._y) * self._X, axis=0)  # type: ignore
+                new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])  # type: ignore
+                new_theta_rest = self._theta[:, range(1, self._n)] - (self.alpha * gradient[1:]) - (penalty/self._m)  # type: ignore
 
                 new_theta = np.hstack((new_theta_0, new_theta_rest))
 
@@ -680,10 +678,9 @@ class LassoRegression:
                 # simultaneous operation
                 ################################################################################################################
 
-                gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)
-                new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])
-                new_theta_rest = self._theta[:, range(
-                    1, self._n)] - (self.alpha * gradient[1:]) - (penalty/self._m)
+                gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)  # type: ignore
+                new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])  # type: ignore
+                new_theta_rest = self._theta[:, range(1, self._n)] - (self.alpha * gradient[1:]) - (penalty/self._m)  # type: ignore
 
                 new_theta = np.hstack((new_theta_0, new_theta_rest))
 
