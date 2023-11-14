@@ -14,7 +14,7 @@ def rotation_matrix_2d(theta: float) -> np.ndarray:
 
     Reference article
     ------------------
-    
+
     https://en.wikipedia.org/wiki/Rotation_matrix
 
     Args:
@@ -24,15 +24,13 @@ def rotation_matrix_2d(theta: float) -> np.ndarray:
         np.ndarray: rotation matrix.
     """
 
-    mat = np.array([
-        [np.cos(theta), -np.sin(theta)],
-        [np.sin(theta), np.cos(theta)]
-    ])
+    mat = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
     return mat
 
 
-def spiral_data(data_limit: int = 30, n_classes: int = 2,
-                         n_samples_per_class=300) -> Tuple[np.ndarray, np.ndarray]:
+def spiral_data(
+    data_limit: int = 30, n_classes: int = 2, n_samples_per_class=300
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Generate spiral data for classification problem.
 
@@ -48,23 +46,35 @@ def spiral_data(data_limit: int = 30, n_classes: int = 2,
     theta = np.pi * (2 / n_classes)
     rotation_mat = rotation_matrix_2d(theta=theta)
 
-    features = [np.array([
-        [
-            (np.cos(i/8) * i) + np.random.randn(), (np.sin(i/8) * i) + np.random.randn()
-        ] for i in np.linspace(2, data_limit, n_samples_per_class)
-    ])]
+    features = [
+        np.array(
+            [
+                [
+                    (np.cos(i / 8) * i) + np.random.randn(),
+                    (np.sin(i / 8) * i) + np.random.randn(),
+                ]
+                for i in np.linspace(2, data_limit, n_samples_per_class)
+            ]
+        )
+    ]
     target = [np.ones(shape=(n_samples_per_class, 1), dtype=np.int32) * 0]
 
-    for i in range(0, n_classes-1):
+    for i in range(0, n_classes - 1):
         features.append(features[-1] @ rotation_mat)
-        target.append(np.ones(shape=(n_samples_per_class, 1), dtype=np.int32) * i+1)
+        target.append(np.ones(shape=(n_samples_per_class, 1), dtype=np.int32) * i + 1)
     X = np.vstack(features)
     y = np.vstack(target)
     return X, y
 
+
 def sine_wave_from_sample(
-        n_samples: int, signal_freq: float, n_cycles: int = 10, amplitude: int = 1,
-        amp_shift: int = 0, phase_shift: int = 0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    n_samples: int,
+    signal_freq: float,
+    n_cycles: int = 10,
+    amplitude: int = 1,
+    amp_shift: int = 0,
+    phase_shift: int = 0,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Sine wave generation with number of samples and signal frequency
 
@@ -86,19 +96,25 @@ def sine_wave_from_sample(
     # n_samples = int((sampling_freq / signal_freq) * n_cycles)
 
     t_step = 1 / sampling_freq
-    time = np.linspace(0, (n_samples-1) * t_step, n_samples)
+    time = np.linspace(0, (n_samples - 1) * t_step, n_samples)
 
     f_step = sampling_freq / n_samples
-    freq = np.linspace(0, (n_samples-1) * f_step, n_samples)
+    freq = np.linspace(0, (n_samples - 1) * f_step, n_samples)
 
-    wave = amp_shift + amplitude * \
-        np.sin((2 * np.pi * signal_freq * time) + phase_shift)
+    wave = amp_shift + amplitude * np.sin(
+        (2 * np.pi * signal_freq * time) + phase_shift
+    )
 
     return wave, time, freq
 
+
 def sine_wave_from_timesteps(
-        signal_freq: float, time_step: float, amplitude: int = 1, amp_shift: int = 0,
-        phase_shift: int = 0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    signal_freq: float,
+    time_step: float,
+    amplitude: int = 1,
+    amp_shift: int = 0,
+    phase_shift: int = 0,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Sine wave generation with time steps and signal frequency
 
@@ -114,15 +130,16 @@ def sine_wave_from_timesteps(
     """
     time = np.arange(0, 1, time_step)
     n = len(time)
-    freq = (1/(time_step * n)) * np.arange(n)
+    freq = (1 / (time_step * n)) * np.arange(n)
 
-    wave = amp_shift + amplitude * \
-        np.sin((2 * np.pi * signal_freq * time) + phase_shift)
+    wave = amp_shift + amplitude * np.sin(
+        (2 * np.pi * signal_freq * time) + phase_shift
+    )
 
     return wave, time, freq
-        
-if __name__ == "__main__":
 
+
+if __name__ == "__main__":
     # import seaborn as sns
     # import matplotlib.pyplot as plt
 

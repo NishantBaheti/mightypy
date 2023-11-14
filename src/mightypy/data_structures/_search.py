@@ -5,7 +5,9 @@ searching methods
 from typing import Union, Tuple, List
 
 
-def linear_search(arr: List[Union[int, float, str]], ele: Union[int, float, str]) -> Union[Tuple[bool, int], Tuple[bool, None]]:
+def linear_search(
+    arr: List[Union[int, float, str]], ele: Union[int, float, str]
+) -> Union[Tuple[bool, int], Tuple[bool, None]]:
     """Linear search algorithm
 
     Args:
@@ -22,7 +24,9 @@ def linear_search(arr: List[Union[int, float, str]], ele: Union[int, float, str]
     return False, None
 
 
-def binary_search(arr: List[Union[int, float, str]], ele: Union[int, float, str]) -> Union[Tuple[bool, int], Tuple[bool, None]]:
+def binary_search(
+    arr: List[Union[int, float, str]], ele: Union[int, float, str]
+) -> Union[Tuple[bool, int], Tuple[bool, None]]:
     """Binary search algorithm
 
     Args:
@@ -39,7 +43,7 @@ def binary_search(arr: List[Union[int, float, str]], ele: Union[int, float, str]
         mid = int(low + (high - low) / 2)
         if arr[mid] == ele:
             return True, mid
-            
+
         if arr[mid] < ele:
             low = mid + 1
         else:

@@ -9,14 +9,11 @@ from ._linear import (
     RidgeRegression,
     LogisticRegression,
     polynomial_regression,
-    trend
+    trend,
 )
 
 
-from ._tree import (
-    DecisionTreeClassifier,
-    DecisionTreeRegressor
-)
+from ._tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from ._ensemble import (
     AdaboostClassifier,
@@ -24,10 +21,7 @@ from ._ensemble import (
     RandomForestRegressor,
 )
 
-from ._utils import (
-    moving_window_matrix,
-    sigmoid
-)
+from ._utils import moving_window_matrix, sigmoid
 
 
 __all__ = [
@@ -43,5 +37,5 @@ __all__ = [
     "RandomForestClassifier",
     "RandomForestRegressor",
     "moving_window_matrix",
-    "sigmoid"
+    "sigmoid",
 ]

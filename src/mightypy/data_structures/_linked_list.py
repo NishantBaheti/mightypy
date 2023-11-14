@@ -2,9 +2,10 @@
 Linked list setup
 """
 
+
 class Node:
     def __init__(self, data):
-        self.data = data 
+        self.data = data
         self._next = None
 
     @property
@@ -12,18 +13,19 @@ class Node:
         return self._next
 
     @next.setter
-    def next(self,new_next):
+    def next(self, new_next):
         self._next = new_next
 
     def __repr__(self):
         return f"Node Value : {self.data}"
+
 
 class LinkedList:
     def __init__(self):
         self.head = None
         self.tail = None
 
-    def append(self,value):
+    def append(self, value):
         """Insert at the end.
 
         Args:
@@ -39,8 +41,7 @@ class LinkedList:
             self.tail.next = temp
             self.tail = self.tail.next
 
-
-    def push(self,value):
+    def push(self, value):
         """Push at the begining.
 
         Args:
@@ -72,7 +73,6 @@ class LinkedList:
         return node_values
 
     def __len__(self):
-
         size = 0
         curr_node = self.head
 
@@ -84,15 +84,13 @@ class LinkedList:
 
 
 if __name__ == "__main__":
-    
     l_list = LinkedList()
 
     for i in range(10):
-        l_list.push("push"+str(i))
+        l_list.push("push" + str(i))
 
     for i in range(10):
-        l_list.append("insert"+str(i))
-
+        l_list.append("insert" + str(i))
 
     print(l_list.traverse())
 

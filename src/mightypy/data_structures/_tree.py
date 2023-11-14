@@ -2,9 +2,9 @@
 Binary tree setup
 """
 
+
 class Node:
-    """A node for binary tree
-    """
+    """A node for binary tree"""
 
     def __init__(self, data):
         self.data = data
@@ -14,28 +14,26 @@ class Node:
     @property
     def left(self):
         return self._left
-    
+
     @left.setter
-    def left(self,new_left):
+    def left(self, new_left):
         self._left = new_left
 
     @property
     def right(self):
         return self._right
-    
+
     @right.setter
-    def right(self,new_right):
+    def right(self, new_right):
         self._right = new_right
 
     def __repr__(self) -> str:
         return f"""Tree Node Value:{self.data}"""
 
 
-
 class BinaryTree:
-
     def __init__(self) -> None:
-        self._root = None   
+        self._root = None
 
     @staticmethod
     def _calc_height(node):
@@ -45,7 +43,7 @@ class BinaryTree:
             # Compute the height of each subtree
             lheight = BinaryTree._calc_height(node.left)
             rheight = BinaryTree._calc_height(node.right)
-    
+
             # Use the larger one
             return max(lheight, rheight) + 1
 
@@ -53,7 +51,7 @@ class BinaryTree:
     def height(self):
         return self._calc_height(self._root)
 
-    def insert(self,val):
+    def insert(self, val):
         """
         Level order insertion.
 
@@ -86,7 +84,7 @@ class BinaryTree:
     def _level_order_traverse(self):
         if self._root is None:
             return
-        
+
         q = []
         values = []
         q.append(self._root)
@@ -96,7 +94,7 @@ class BinaryTree:
 
             if node.left is not None:
                 q.append(node.left)
-            
+
             if node.right is not None:
                 q.append(node.right)
         return values
@@ -165,7 +163,7 @@ class BinaryTree:
         """Inorder traversal using stack
 
         Notes:
-            Algorithm 
+            Algorithm
 
                 1. Create an empty stack S.
                 2. Initialize current node as root
@@ -175,7 +173,7 @@ class BinaryTree:
                     4.1. Pop the top item from stack
                     4.2. Print the popped item, set current = popped_item->right
                     4.3. Go to step 3
-                    
+
                 5. If current is NULL and stack is empty then we are done.
 
         Returns:
@@ -233,7 +231,7 @@ class BinaryTree:
         Notes:
             Algorithm
                 TODO
-                
+
         Returns:
             node_values (list): node values
         """
@@ -276,7 +274,7 @@ class BinaryTree:
         order = order.lower()
         method = method.lower()
 
-        if order=="level":
+        if order == "level":
             values = self._level_order_traverse()
         else:
             if method == "recursion":
@@ -306,7 +304,6 @@ class BinaryTree:
 
     @staticmethod
     def _invert(node):
-
         node.left, node.right = node.right, node.left
         if node.left:
             BinaryTree._invert(node=node.left)
@@ -317,9 +314,7 @@ class BinaryTree:
         BinaryTree._invert(node=self._root)
 
 
-    
 class BST:
-
     def __init__(self) -> None:
         self._root = None
 
@@ -331,44 +326,41 @@ class BST:
             if node.data == val:
                 pass
             elif node.data > val:
-                node.left = BST._insert(node=node.left,val=val)
+                node.left = BST._insert(node=node.left, val=val)
             else:
-                node.right = BST._insert(node=node.right,val=val)
+                node.right = BST._insert(node=node.right, val=val)
 
         return node
 
     def insert(self, val):
-        self._root = BST._insert(self._root,val)
+        self._root = BST._insert(self._root, val)
 
     @staticmethod
-    def _inorder_traverse(node, data_arr = []):
+    def _inorder_traverse(node, data_arr=[]):
         if node is not None:
-
             BST._inorder_traverse(node.left, data_arr)
             data_arr.append(node.data)
             BST._inorder_traverse(node.right, data_arr)
-            
+
         return data_arr
 
     @staticmethod
-    def _preorder_traverse(node, data_arr = []):
+    def _preorder_traverse(node, data_arr=[]):
         if node is not None:
             data_arr.append(node.data)
             BST._preorder_traverse(node.left, data_arr)
             BST._preorder_traverse(node.right, data_arr)
-            
+
         return data_arr
 
     @staticmethod
-    def _postorder_traverse(node, data_arr = []):
+    def _postorder_traverse(node, data_arr=[]):
         if node is not None:
             BST._postorder_traverse(node.left, data_arr)
             BST._postorder_traverse(node.right, data_arr)
             data_arr.append(node.data)
-            
-        return data_arr
 
-    
+        return data_arr
 
     @staticmethod
     def _level_order_traverse(node):
@@ -379,14 +371,14 @@ class BST:
             # this temp storage will store nodes that needs to be processed in FIFO
             # as we are talking about level order
             # so it needs to go by this order
-            #                    
+            #
             #                         root
             #                      /       \
             #                 left1         right1
             #                /    \          /    \
             #             left2   right2   left3   right3
             # root -> left1 -> right1 -> left2 -> right2 -> left3 -> right3
-            # 
+            #
             # queue's condition
             # [] <- root
             # [root]
@@ -397,7 +389,7 @@ class BST:
             # right2 <- [ left3 right3 ]
             # left3 <- [ right3 ]
             # right3 <- []
-        
+
             queue = []
             queue.append(node)
 
@@ -406,26 +398,23 @@ class BST:
 
             # now run the loop until we reach to an empty queue
             while len(queue):
-
                 # take the first element from the queue and add it in data_arr
                 # remove the element from queue but use it for left and right nodes iteration
                 curr_node = queue.pop(0)
 
                 data_arr.append(curr_node.data)
-                
-                if curr_node.left is not None: # adding left node to queue
+
+                if curr_node.left is not None:  # adding left node to queue
                     queue.append(curr_node.left)
-                
-                if curr_node.right is not None: # adding right node to queue
+
+                if curr_node.right is not None:  # adding right node to queue
                     queue.append(curr_node.right)
-            
-                # based on FIFO queue will process left node first 
+
+                # based on FIFO queue will process left node first
                 # then the right node.
             return data_arr
 
-
     def traverse(self, order="level"):
-        
         order = order.lower()
 
         if order == "level":
@@ -439,12 +428,11 @@ class BST:
         else:
             pass
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     # tree = BinaryTree()
     # for i in range(1,7):
     #     tree.insert(i)
-
 
     # print("height", tree.height)
 
@@ -455,7 +443,6 @@ if __name__ == "__main__":
     # print("level", tree.traverse(order="level", method="stack"))
     # print("height", tree.height)
 
-
     # print("post", tree.traverse(order="post",method="stack"))
     # print("post", tree.traverse(order="post", method="recursion"))
 
@@ -465,11 +452,9 @@ if __name__ == "__main__":
     # print("in", tree.traverse(order="in", method="stack"))
     # print("in", tree.traverse(order="in", method="recursion"))
 
-
     bst = BST()
 
-    for i in [3,4,6,12,9,11,5]:
+    for i in [3, 4, 6, 12, 9, 11, 5]:
         bst.insert(val=i)
 
     print(bst.traverse(order="in"))
-    
