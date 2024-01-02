@@ -11,6 +11,7 @@ Jinja2==3.0.2
 MarkupSafe==2.0.1
 numpy==1.21.3
 packaging==21.2
+pandas==2.0.3
 pydata-sphinx-theme==0.6.3
 Pygments==2.10.0
 pyparsing==2.4.7
