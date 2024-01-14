@@ -4,7 +4,7 @@ mightypy.make
 """
 
 
-from ._dataset import (
+from mightypy.make._dataset import (
     spiral_data,
     rotation_matrix_2d,
     sine_wave_from_sample,

@@ -4,14 +4,6 @@ Contributing
 
 Welcome to ``mightypy`` contributor's guide.
 
-This document focuses on getting any potential contributor familiarized
-with the development processes, but `other kinds of contributions`_ are also
-appreciated.
-
-If you are new to using git_ or have never collaborated in a project previously,
-please have a look at `contribution-guide.org`_. Other resources are also
-listed in the excellent `guide created by FreeCodeCamp`_ [#contrib1]_.
-
 Please notice, all users and contributors are expected to be **open,
 considerate, reasonable, and respectful**. When in doubt, `Python Software
 Foundation's Code of Conduct`_ is a good reference in terms of behavior
@@ -47,26 +39,6 @@ by adding missing information and correcting mistakes.
 This means that the docs are kept in the same repository as the project code, and
 that any documentation update is done in the same way was a code contribution.
 
-.. todo:: Don't forget to mention which markup language you are using.
-
-    e.g.,  reStructuredText_ or CommonMark_ with MyST_ extensions.
-
-.. todo:: If your project is hosted on GitHub, you can also mention the following tip:
-
-   .. tip::
-      Please notice that the `GitHub web interface`_ provides a quick way of
-      propose changes in ``mightypy``'s files. While this mechanism can
-      be tricky for normal code contributions, it works perfectly fine for
-      contributing to the docs, and can be quite handy.
-
-      If you are interested in trying this method out, please navigate to
-      the ``docs`` folder in the source repository_, find which file you
-      would like to propose changes and click in the little pencil icon at the
-      top, to open `GitHub's code editor`_. Once you finish editing the file,
-      please write a message in the form at the bottom of the page describing
-      which changes have you made and what are the motivations behind them and
-      submit your proposal.
-
 When working on documentation changes in your local machine, you can
 compile them using |tox|_::
 
@@ -99,15 +71,9 @@ Create an environment
 
 Before you start coding, we recommend creating an isolated `virtual
 environment`_ to avoid any problems with your installed Python packages.
-This can easily be done via either |virtualenv|_::
 
-    virtualenv <PATH TO VENV>
-    source <PATH TO VENV>/bin/activate
-
-or Miniconda_::
-
-    conda create -n mightypy python=3 six virtualenv pytest pytest-cov
-    conda activate mightypy
+    python -m venv .venv
+    source .venv/bin/activate
 
 Clone the repository
 --------------------
@@ -122,19 +88,10 @@ Clone the repository
 
 #. You should run::
 
-    pip install -U pip setuptools -e .
+    pip install -U pip 
+    pip install -U tox -e .
 
    to be able to import the package under development in the Python REPL.
-
-   .. todo:: if you are not using pre-commit, please remove the following item:
-
-#. Install |pre-commit|_::
-
-    pip install pre-commit
-    pre-commit install
-
-   ``mightypy`` comes with a lot of hooks configured to automatically help the
-   developer to check the code being written.
 
 Implement your changes
 ----------------------
@@ -191,8 +148,6 @@ Maintainer tasks
 
 Releases
 --------
-
-
 
 .. <-- strart -->
 .. todo:: Please review and change the following definitions:

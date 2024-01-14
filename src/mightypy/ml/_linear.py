@@ -4,7 +4,6 @@ Linear Models of Machine Learning
 
 from typing import Union, Tuple
 import numpy as np
-from mightypy import __version__
 from mightypy.ml._error_fxs import calculate_mse_cost, calculate_entropy_cost
 from mightypy.ml._utils import sigmoid
 

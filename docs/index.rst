@@ -13,6 +13,7 @@ Contents
    :maxdepth: 4
 
    Modules <api/mightypy>
+   Contribution <contributing>
    License <license>
    Authors <authors>
 

@@ -3,7 +3,7 @@ mightypy.ml
 =============
 """
 
-from ._linear import (
+from mightypy.ml._linear import (
     LinearRegression,
     LassoRegression,
     RidgeRegression,
@@ -13,15 +13,15 @@ from ._linear import (
 )
 
 
-from ._tree import DecisionTreeClassifier, DecisionTreeRegressor
+from mightypy.ml._tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-from ._ensemble import (
+from mightypy.ml._ensemble import (
     AdaboostClassifier,
     RandomForestClassifier,
     RandomForestRegressor,
 )
 
-from ._utils import moving_window_matrix, sigmoid
+from mightypy.ml._utils import moving_window_matrix, sigmoid
 
 
 __all__ = [

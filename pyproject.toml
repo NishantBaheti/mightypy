@@ -1,9 +1,53 @@
+[project]
+name = "mightypy"                    # Required
+dynamic = ["version"]
+description = "This package initially started with the idea of expanding mightiness of python with expermenting on data structures and machine learning algorithms"
+readme = "README.rst"    
+requires-python = ">=3.8"
+license = {file = "LICENSE.txt"}
+keywords = ["sample", "setuptools", "development"] # Optional
+authors = [
+    { name = "Nishant Baheti", email = "nishantbaheti.it19@gmail.com" }, # Optional
+]
+
+classifiers = [
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3 :: Only",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Information Technology"
+]
+
+dependencies = [
+    "numpy==1.21.3",
+	"pandas==2.0.3",
+    "matplotlib>=3.5.1"
+]
+
+[project.optional-dependencies] # Optional
+dev = []
+test = ["pytest==7.4.3", "pytest-cov==4.1.0"]
+
+# List URLs that are relevant to your project
+[project.urls] # Optional
+"Homepage" = "https://github.com/nishantbaheti/mightypy"
+"Bug Reports" = "https://github.com/nishantbaheti/mightypy/issues"
+"Source" = "https://github.com/nishantbaheti/mightypy/"
+
 [build-system]
-# AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "setuptools_scm[toml]>=5", "wheel"]
+requires = ["setuptools>=64", "setuptools_scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 # For smarter version schemes and other configuration options,
 # check out https://github.com/pypa/setuptools_scm
 version_scheme = "no-guess-dev"
+
+[tool.setuptools.packages.find]
+where = ["src"]
