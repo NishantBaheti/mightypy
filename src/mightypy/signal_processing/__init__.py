@@ -4,11 +4,9 @@ mightypy.signal_processing
 
 """
 
-from mightypy.signal_processing._fft import (
-    DenoiseFFT
-)
+from mightypy.signal_processing._fft import PSDDenoiser
 
 
 __all__ = [
-    'DenoiseFFT'
+    'PSDDenoiser'
 ]

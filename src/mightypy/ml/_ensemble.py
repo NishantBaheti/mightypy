@@ -1,6 +1,7 @@
 """
 Ensemble methods for Machine Learning
 """
+
 from __future__ import annotations
 from typing import Union, Tuple, List, Optional
 import numpy as np

@@ -7,7 +7,7 @@ import numpy as np
 
 def sigmoid(val: np.ndarray) -> np.ndarray:
     """Sigmoid function
-
+    
     .. math::
         f(z) = \\frac{1}{1 + e^{-z}}
 
@@ -43,20 +43,20 @@ def moving_window_matrix(arr: np.ndarray, window: int, lag: int = 1) -> np.ndarr
         >>> print(moving_window_matrix(a, 20, 2))
     """
 
-    assert len(np.shape(arr)) == 1, 'input array shape should be 1D like (m,).'
+    assert len(np.shape(arr)) == 1, "input array shape should be 1D like (m,)."
     size = arr.shape[0]
-    assert size > window and size > lag, \
-        'length of array should be greater than window size and lag.'
+    assert (
+        size > window and size > lag
+    ), "length of array should be greater than window size and lag."
 
     frame_width = size - window + 1
 
     new_frame_width = int(np.ceil(frame_width / lag))
     new_frame = np.empty(shape=(window, new_frame_width))
     for row in range(0, window):
-        new_frame[row] = arr[row: row+frame_width][::lag]
+        new_frame[row] = arr[row : row + frame_width][::lag]
 
     return new_frame.T
-
 
 
 if __name__ == "__main__":
@@ -74,7 +74,6 @@ if __name__ == "__main__":
     # plt.plot(x, t, '.-',  label='regression line')
     # plt.legend()
     # plt.show()
-
 
     # x = np.arange(-10, 10)
     # y = x**2 + x**3

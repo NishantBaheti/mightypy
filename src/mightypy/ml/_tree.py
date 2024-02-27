@@ -13,9 +13,13 @@ class Question:
         header (str): column/header name.
     """
 
-    def __init__(self, column_index: int, value: Union[int, str, float, np.int64, np.float64], header: str):
-        """Constructor
-        """
+    def __init__(
+        self,
+        column_index: int,
+        value: Union[int, str, float, np.int64, np.float64],
+        header: str,
+    ):
+        """Constructor"""
         self.column_index = column_index
         self.value = value
         self.header = header
@@ -57,9 +61,16 @@ class Node:
         leaf_value (Union[dict,int,float], optional): Leaf node/final node's value. Defaults to None.
     """
 
-    def __init__(self, question: Question = None, true_branch: Node = None, false_branch: Node = None, uncertainty: float = None, *, leaf_value: Union[dict, int, float] = None):
-        """Constructor
-        """
+    def __init__(
+        self,
+        question: Question = None,
+        true_branch: Node = None,
+        false_branch: Node = None,
+        uncertainty: float = None,
+        *,
+        leaf_value: Union[dict, int, float] = None,
+    ):
+        """Constructor"""
         self.question = question
         self.true_branch = true_branch
         self.false_branch = false_branch
@@ -84,9 +95,10 @@ class DecisionTreeClassifier:
         criteria (str, optional): what criteria to use for information. Defaults to 'gini'. available 'gini','entropy'.
     """
 
-    def __init__(self, max_depth: int = 100, min_samples_split: int = 2, criteria: str = 'gini'):
-        """Constructor
-        """
+    def __init__(
+        self, max_depth: int = 100, min_samples_split: int = 2, criteria: str = "gini"
+    ):
+        """Constructor"""
         self._X = None
         self._y = None
         self._feature_names = None
@@ -156,7 +168,9 @@ class DecisionTreeClassifier:
             value = self._gini_impurity(a)
         return value
 
-    def _partition(self, rows: np.ndarray, question: Union[Question, None]) -> Tuple[list, list]:
+    def _partition(
+        self, rows: np.ndarray, question: Union[Question, None]
+    ) -> Tuple[list, list]:
         """partition the rows based on the question
 
         Args:
@@ -174,7 +188,9 @@ class DecisionTreeClassifier:
                 false_idx.append(idx)
         return true_idx, false_idx
 
-    def _info_gain(self, left: np.ndarray, right: np.ndarray, parent_uncertainty: float) -> float:
+    def _info_gain(
+        self, left: np.ndarray, right: np.ndarray, parent_uncertainty: float
+    ) -> float:
         """Calculate information gain after splitting
 
         Args:
@@ -190,19 +206,22 @@ class DecisionTreeClassifier:
         pr = left.shape[0] / (left.shape[0] + right.shape[0])
 
         # calcualte child uncertainity
-        child_uncertainty = pr * \
-            self._uncertainty(left) - (1 - pr) * self._uncertainty(right)
+        child_uncertainty = pr * self._uncertainty(left) - (1 - pr) * self._uncertainty(
+            right
+        )
         # calculate information gain
         info_gain_value = parent_uncertainty - child_uncertainty
         return info_gain_value
 
-    def _find_best_split(self, X: np.ndarray, y: np.ndarray) -> Tuple[float, Union[Question, None], float]:
+    def _find_best_split(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[float, Union[Question, None], float]:
         """method to find best split possible for the sample
-        
+
         Args:
             X (np.ndarray): Feature matrix.
             y (np.ndarray): target matrix.
-        
+
         Returns:
             Tuple[float,Union[Question,None],float]: maximum gain from the split, best question of it, and parent node uncertainty.
         """
@@ -217,12 +236,14 @@ class DecisionTreeClassifier:
         for col_index in range(n_labels):  # iterate over feature columns
             # get unique values from the feature
             unique_values = np.unique(X[:, col_index])
-            for val in unique_values:  # check for every value and find maximum info gain
+            for (
+                val
+            ) in unique_values:  # check for every value and find maximum info gain
 
                 ques = Question(
                     column_index=col_index,
                     value=val,
-                    header=self._feature_names[col_index]
+                    header=self._feature_names[col_index],
                 )
 
                 t_idx, f_idx = self._partition(X, ques)
@@ -245,7 +266,7 @@ class DecisionTreeClassifier:
         """Recursive funtion to build tree.
 
         Args:
-            X (np.ndarray): input features matrix.   
+            X (np.ndarray): input features matrix.
             y (np.ndarray): target matrix.
             depth (int, optional): depth count of the recursion. Defaults to 0.
 
@@ -257,7 +278,11 @@ class DecisionTreeClassifier:
         # if depth is greater than max depth defined or labels/features are left to 1
         # or number of samples are less than the minimum size of samples to split then
         # stop recursion and return a node
-        if (depth > self.max_depth or n_labels == 1 or m_samples < self.min_samples_split):
+        if (
+            depth > self.max_depth
+            or n_labels == 1
+            or m_samples < self.min_samples_split
+        ):
             return Node(leaf_value=self._count_dict(y))
 
         gain, ques, uncertainty = self._find_best_split(X, y)
@@ -269,17 +294,25 @@ class DecisionTreeClassifier:
 
         t_idx, f_idx = self._partition(X, ques)  # get partition idxs
         true_branch = self._build_tree(
-            X[t_idx, :], y[t_idx, :], depth + 1)  # recog true branch samples
+            X[t_idx, :], y[t_idx, :], depth + 1
+        )  # recog true branch samples
         false_branch = self._build_tree(
-            X[f_idx, :], y[f_idx, :], depth + 1)  # recog false branch samples
+            X[f_idx, :], y[f_idx, :], depth + 1
+        )  # recog false branch samples
         return Node(
             question=ques,
             true_branch=true_branch,
             false_branch=false_branch,
-            uncertainty=uncertainty
+            uncertainty=uncertainty,
         )
 
-    def train(self, X: Union[np.ndarray, list], y: Union[np.ndarray, list], feature_name: list = None, target_name: list = None) -> None:
+    def train(
+        self,
+        X: Union[np.ndarray, list],
+        y: Union[np.ndarray, list],
+        feature_name: list = None,
+        target_name: list = None,
+    ) -> None:
         """Train the model
 
         Args:
@@ -289,10 +322,12 @@ class DecisionTreeClassifier:
             target_name (list, optional): target name list. Defaults to None.
         """
 
-        X = np.array(X, dtype='O') if not isinstance(
-            X, (np.ndarray)) else X  # converting to numpy array
-        y = np.array(y, dtype='O') if not isinstance(
-            y, (np.ndarray)) else y  # converting to numpy array
+        X = (
+            np.array(X, dtype="O") if not isinstance(X, (np.ndarray)) else X
+        )  # converting to numpy array
+        y = (
+            np.array(y, dtype="O") if not isinstance(y, (np.ndarray)) else y
+        )  # converting to numpy array
 
         # reshaping to vectors
         self._X = X.reshape(-1, 1) if len(X.shape) == 1 else X
@@ -300,17 +335,15 @@ class DecisionTreeClassifier:
 
         # creating feature names if not mentioned
         self._feature_names = feature_name or [
-            f"C_{i}" for i in range(self._X.shape[1])]
+            f"C_{i}" for i in range(self._X.shape[1])
+        ]
 
         # creating target name if not mentioned
-        self._target_name = target_name or ['target']
+        self._target_name = target_name or ["target"]
 
         # BOOOM
         # building the tree
-        self._tree = self._build_tree(
-            X=self._X,
-            y=self._y
-        )
+        self._tree = self._build_tree(X=self._X, y=self._y)
 
     def print_tree(self, node: Union[Node, None] = None, spacing: str = "|-") -> None:
         """print the tree
@@ -327,15 +360,21 @@ class DecisionTreeClassifier:
             return
 
         # Print the question at this node
-        print(spacing + str(node.question) +
-              " | " + self.criteria + " :" + str(node.uncertainty))
+        print(
+            spacing
+            + str(node.question)
+            + " | "
+            + self.criteria
+            + " :"
+            + str(node.uncertainty)
+        )
 
         # Call this function recursively on the true branch
-        print(spacing + '--> True:')
+        print(spacing + "--> True:")
         self.print_tree(node.true_branch, "  " + spacing + "-")
 
         # Call this function recursively on the false branch
-        print(spacing + '--> False:')
+        print(spacing + "--> False:")
         self.print_tree(node.false_branch, "  " + spacing + "-")
 
     def _classification(self, row: np.ndarray, node: Union[Node, None]) -> Union[dict]:
@@ -384,7 +423,7 @@ class DecisionTreeClassifier:
             np.ndarray: results of classification.
         """
         if isinstance(X, (np.ndarray, list)):
-            X = np.array(X, dtype='O') if not isinstance(X, (np.ndarray)) else X
+            X = np.array(X, dtype="O") if not isinstance(X, (np.ndarray)) else X
 
             if len(X.shape) == 1:
                 max_result = 0
@@ -393,7 +432,7 @@ class DecisionTreeClassifier:
                 for key in result_dict:
                     if result_dict[key] > max_result:
                         result = key
-                return np.array([[result]], dtype='O')
+                return np.array([[result]], dtype="O")
             else:
                 leaf_value = []
                 # get maximum caterigorical value from all catergories
@@ -405,11 +444,13 @@ class DecisionTreeClassifier:
                         if result_dict[key] > max_result:
                             result = key
                     leaf_value.append([result])
-                return np.array(leaf_value, dtype='O')
+                return np.array(leaf_value, dtype="O")
         else:
             raise ValueError("X should be list or numpy array")
 
-    def predict_probability(self, X: Union[np.ndarray, list]) -> Union[np.ndarray, dict]:
+    def predict_probability(
+        self, X: Union[np.ndarray, list]
+    ) -> Union[np.ndarray, dict]:
         """predict classfication probabilities
 
         Args:
@@ -422,16 +463,23 @@ class DecisionTreeClassifier:
             Union[np.ndarray, dict]: probabity results of classification.
         """
         if isinstance(X, (np.ndarray, list)):
-            X = np.array(X, dtype='O') if not isinstance(X, (np.ndarray)) else X
+            X = np.array(X, dtype="O") if not isinstance(X, (np.ndarray)) else X
 
             if len(X.shape) == 1:
-                return self._leaf_probabilities(self._classification(row=X, node=self._tree))
+                return self._leaf_probabilities(
+                    self._classification(row=X, node=self._tree)
+                )
             else:
                 leaf_value = []
                 for row in X:
-                    leaf_value.append([self._leaf_probabilities(
-                        self._classification(row=row, node=self._tree))])
-                return np.array(leaf_value, dtype='O')
+                    leaf_value.append(
+                        [
+                            self._leaf_probabilities(
+                                self._classification(row=row, node=self._tree)
+                            )
+                        ]
+                    )
+                return np.array(leaf_value, dtype="O")
         else:
             raise ValueError("X should be list or numpy array")
 
@@ -445,9 +493,13 @@ class DecisionTreeRegressor:
         criteria (str, optional): criteria for best info gain. Defaults to 'variance'.
     """
 
-    def __init__(self, max_depth: int = 10, min_samples_split: int = 3, criteria: str = 'variance'):
-        """constructor
-        """
+    def __init__(
+        self,
+        max_depth: int = 10,
+        min_samples_split: int = 3,
+        criteria: str = "variance",
+    ):
+        """constructor"""
         self._X = None
         self._y = None
         self._feature_names = None
@@ -469,7 +521,9 @@ class DecisionTreeRegressor:
 
         return float(np.mean(a))
 
-    def _partition(self, rows: np.ndarray, question: Union[Question, None]) -> Tuple[list, list]:
+    def _partition(
+        self, rows: np.ndarray, question: Union[Question, None]
+    ) -> Tuple[list, list]:
         """partition the rows based on the question
 
         Args:
@@ -503,7 +557,9 @@ class DecisionTreeRegressor:
             value = np.var(a)
         return float(value)
 
-    def _info_gain(self, left: np.ndarray, right: np.ndarray, parent_uncertainty: float) -> float:
+    def _info_gain(
+        self, left: np.ndarray, right: np.ndarray, parent_uncertainty: float
+    ) -> float:
         """Calculate information gain after splitting
 
         Args:
@@ -517,12 +573,15 @@ class DecisionTreeRegressor:
 
         pr = left.shape[0] / (left.shape[0] + right.shape[0])
 
-        child_uncertainty = pr * \
-            self._uncertainty(left) - (1 - pr) * self._uncertainty(right)
+        child_uncertainty = pr * self._uncertainty(left) - (1 - pr) * self._uncertainty(
+            right
+        )
         info_gain_value = parent_uncertainty - child_uncertainty
         return info_gain_value
 
-    def _find_best_split(self, X: np.ndarray, y: np.ndarray) -> Tuple[float, Union[Question, None], float]:
+    def _find_best_split(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[float, Union[Question, None], float]:
         """method to find best split possible for the sample
 
         Args:
@@ -543,12 +602,14 @@ class DecisionTreeRegressor:
         for col_index in range(n_labels):  # iterate over feature columns
             # get unique values from the feature
             unique_values = np.unique(X[:, col_index])
-            for val in unique_values:  # check for every value and find maximum info gain
+            for (
+                val
+            ) in unique_values:  # check for every value and find maximum info gain
 
                 ques = Question(
                     column_index=col_index,
                     value=val,
-                    header=self._feature_names[col_index]
+                    header=self._feature_names[col_index],
                 )
 
                 t_idx, f_idx = self._partition(X, ques)
@@ -570,7 +631,7 @@ class DecisionTreeRegressor:
         """Recursive funtion to build tree
 
         Args:
-            X (np.ndarray): input features matrix.   
+            X (np.ndarray): input features matrix.
             y (np.ndarray): target matrix.
             depth (int, optional): depth count of the recursion. Defaults to 0.
 
@@ -582,7 +643,11 @@ class DecisionTreeRegressor:
         # if depth is greater than max depth defined or labels/features are left to 1
         # or number of samples are less than the minimum size of samples to split then
         # stop recursion and return a node
-        if (depth > self.max_depth or n_labels == 1 or m_samples < self.min_samples_split):
+        if (
+            depth > self.max_depth
+            or n_labels == 1
+            or m_samples < self.min_samples_split
+        ):
             return Node(leaf_value=y)
 
         gain, ques, uncertainty = self._find_best_split(X, y)
@@ -593,17 +658,25 @@ class DecisionTreeRegressor:
 
         t_idx, f_idx = self._partition(X, ques)
         true_branch = self._build_tree(
-            X[t_idx, :], y[t_idx, :], depth + 1)  # get true samples
+            X[t_idx, :], y[t_idx, :], depth + 1
+        )  # get true samples
         false_branch = self._build_tree(
-            X[f_idx, :], y[f_idx, :], depth + 1)  # get false samples
+            X[f_idx, :], y[f_idx, :], depth + 1
+        )  # get false samples
         return Node(
             question=ques,
             true_branch=true_branch,
             false_branch=false_branch,
-            uncertainty=uncertainty
+            uncertainty=uncertainty,
         )
 
-    def train(self, X: Union[np.ndarray, list], y: Union[np.ndarray, list], feature_name: list = None, target_name: list = None) -> None:
+    def train(
+        self,
+        X: Union[np.ndarray, list],
+        y: Union[np.ndarray, list],
+        feature_name: list = None,
+        target_name: list = None,
+    ) -> None:
         """Train the model
 
         Args:
@@ -613,10 +686,12 @@ class DecisionTreeRegressor:
             target_name (list, optional): target name list. Defaults to None.
         """
 
-        X = np.array(X, dtype='O') if not isinstance(
-            X, (np.ndarray)) else X  # converting to numpy array
-        y = np.array(y, dtype='O') if not isinstance(
-            y, (np.ndarray)) else y  # converting to numpy array
+        X = (
+            np.array(X, dtype="O") if not isinstance(X, (np.ndarray)) else X
+        )  # converting to numpy array
+        y = (
+            np.array(y, dtype="O") if not isinstance(y, (np.ndarray)) else y
+        )  # converting to numpy array
 
         # reshaping to vectors
         self._X = X.reshape(-1, 1) if len(X.shape) == 1 else X
@@ -624,19 +699,22 @@ class DecisionTreeRegressor:
 
         # creating feature names if not mentioned
         self._feature_names = feature_name or [
-            f"C_{i}" for i in range(self._X.shape[1])]
+            f"C_{i}" for i in range(self._X.shape[1])
+        ]
 
         # creating target name if not mentioned
-        self._target_name = target_name or ['target']
+        self._target_name = target_name or ["target"]
 
         # BOOOM
         # building the tree
-        self._tree = self._build_tree(
-            X=self._X,
-            y=self._y
-        )
+        self._tree = self._build_tree(X=self._X, y=self._y)
 
-    def print_tree(self, node: Union[Node, None] = None, spacing: str = "|-", mean_preds: bool = True) -> None:
+    def print_tree(
+        self,
+        node: Union[Node, None] = None,
+        spacing: str = "|-",
+        mean_preds: bool = True,
+    ) -> None:
         """print the tree
 
         Args:
@@ -651,29 +729,37 @@ class DecisionTreeRegressor:
             if mean_preds:
                 print(spacing, " Predict :", self._mean_leaf_value(node.leaf_value))
             else:
-                print(spacing, " Predict :", node.leaf_value[...,-1])
+                print(spacing, " Predict :", node.leaf_value[..., -1])
             return
 
         # Print the question at this node
-        print(spacing + str(node.question) +
-              " | " + self.criteria + " :" + str(node.uncertainty))
+        print(
+            spacing
+            + str(node.question)
+            + " | "
+            + self.criteria
+            + " :"
+            + str(node.uncertainty)
+        )
 
         # Call this function recursively on the true branch
-        print(spacing + '--> True:')
+        print(spacing + "--> True:")
         self.print_tree(node.true_branch, "  " + spacing + "-", mean_preds)
 
         # Call this function recursively on the false branch
-        print(spacing + '--> False:')
+        print(spacing + "--> False:")
         self.print_tree(node.false_branch, "  " + spacing + "-", mean_preds)
 
-    def _regression(self, row: np.ndarray, node: Union[Node, None], mean_preds: bool) -> float:
+    def _regression(
+        self, row: np.ndarray, node: Union[Node, None], mean_preds: bool
+    ) -> float:
         """regression recursive method
 
         Args:
             row (np.ndarray): input matrix.
             node (Union[Node,None]): node to start with. mostly root node. rest will be handled by recursion.
             mean_preds (bool): do the mean of prediction values.
-            
+
         Returns:
             float: regression result.
         """
@@ -682,7 +768,7 @@ class DecisionTreeRegressor:
             if mean_preds:
                 return self._mean_leaf_value(node.leaf_value)
             else:
-                return node.leaf_value[...,-1]
+                return node.leaf_value[..., -1]
 
         if node.question.match(row):
             return self._regression(row, node.true_branch, mean_preds)
@@ -700,18 +786,18 @@ class DecisionTreeRegressor:
             np.ndarray: regression prediction.
         """
         if isinstance(X, (np.ndarray, list)):
-            X = np.array(X, dtype='O') if not isinstance(X, (np.ndarray)) else X
+            X = np.array(X, dtype="O") if not isinstance(X, (np.ndarray)) else X
 
             if len(X.shape) == 1:
                 result = self._regression(row=X, node=self._tree, mean_preds=mean_preds)
-                return np.array([[result]], dtype='O')
+                return np.array([[result]], dtype="O")
             else:
                 leaf_value = []
                 for row in X:
-                    result = self._regression(row=row, node=self._tree, mean_preds=mean_preds)
+                    result = self._regression(
+                        row=row, node=self._tree, mean_preds=mean_preds
+                    )
                     leaf_value.append([result])
-                return np.array(leaf_value, dtype='O')
+                return np.array(leaf_value, dtype="O")
         else:
             raise ValueError("X should be list or numpy array")
-
-

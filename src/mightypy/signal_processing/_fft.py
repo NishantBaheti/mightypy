@@ -1,112 +1,146 @@
 """
-Signal Processing module.
-
-
-author : Nishant Baheti <nishantbaheti.it19@gmail.com>
+FFT Denoiser 
+-------------
 """
+# Authors: Nishant Baheti <nishantbaheti.it19@gmail.com>
 
+from typing import Optional, Union
 import numpy as np
 
-class FFTMixins:
-    @staticmethod
-    def psd(f_hat, l_signal):
-        """Power Spectral Density."""
-        return ((f_hat * np.conjugate(f_hat)) / l_signal).real  # type: ignore
 
-    @staticmethod
-    def magnitude(f_hat, l_signal):
-        """Magnitude."""
-        return (np.abs(f_hat) / l_signal).real  # type: ignore
+class PSDDenoiser:
+    """PSD (Power Spectral Density) Based Denoiser
 
+    This method takes the FFT transform of the signal to calculate PSD
+    based on the PSD results and cutoff threshold the signal is filtered and
+    a FFT inverse is applied to regenerate denoised signal.
 
-class DenoiseFFT(FFTMixins):
-    """
-    Denoise signals with Fast Fourier method.
+    Parameters
+    ----------
+    threshold : Optional[Union[int, float, str]], optional
+        threshold to create cutoff mask, but any threshold can be applied,
+        if it is precalculated by any method chosen by the process, by default auto-mean
+        { auto-mean, auto-max }
 
-    Args:
-        method (str): method. accepted values are psd, mag.
-        threshold (float): threshold for cleanup.
-
-    References:
-        https://machinelearningexploration.readthedocs.io/en/latest/MathExploration/SignalProcessingFFT.html
-
-    Examples:
+    Examples
+    --------
+        >>> import numpy as np
         >>> import matplotlib.pyplot as plt
-        >>> from mightypy.make import sine_wave_from_timesteps
-        >>> time_step = 0.001
-        >>> wave1, time1, freqs1 = sine_wave_from_timesteps(signal_freq=50, time_step=time_step)
-        >>> wave2, time2, freqs2 = sine_wave_from_timesteps(signal_freq=70, time_step=time_step)
-        >>> original_signal = wave1 + wave2
-        >>> N = len(original_signal)
-        >>> noisy_signal = original_signal + 2.5 * np.random.randn(N) + 2.8 * np.random.randn(N)  # adding random noise here
-        >>> model = DenoiseFFT('psd', 100)
-        >>> cleaned_signal = model.transform(noisy_signal)
-        >>> plt.plot(original_signal, label='original')
-        >>> plt.plot(noisy_signal, label='noisy')
+        >>> from sklearn.preprocessing import PSDDenoiser
+        >>> rng = np.random.default_rng()
+        >>> fs = 10e3
+        >>> N = 100
+        >>> amp = 2 * np.sqrt(2)
+        >>> freq = 1234.0
+        >>> noise_power = 0.001 * fs / 2
+        >>> time = np.arange(N) / fs
+        >>> X = amp * np.sin(2 * np.pi * freq * time)
+        >>> X += rng.normal(scale=np.sqrt(noise_power), size=time.shape)
+
+        >>> denoiser = PSDDenoiser()
+        >>> cleaned_signal = denoiser.transform(X)
+        >>> plt.plot(X, label="noisy")
+        >>> plt.plot(cleaned_signal, label="cleaned")
+        >>> plt.title(f"Threshold : {denoiser.threshold}")
+        >>> plt.legend(loc="best")
+        >>> plt.show()
+
+        >>> denoiser = PSDDenoiser(10)
+        >>> cleaned_signal = denoiser.transform(X)
+        >>> plt.plot(X, label='noisy')
         >>> plt.plot(cleaned_signal, label='cleaned')
+        >>> plt.title(f"Threshold : {denoiser.threshold}")
         >>> plt.legend(loc='best')
         >>> plt.show()
     """
 
-    def __init__(self, method: str, threshold: float) -> None:
-        assert method.lower() in ('psd', 'mag'), "denoise signal method should be in psd, mag."
-        self._method = method.lower()
-        self._threshold = threshold
-        super().__init__()
+    def __init__(
+        self, threshold: Optional[Union[int, float, str]] = "auto-mean"
+    ) -> None:
+        self._threshold = self.__init_threshold(threshold)
+        self._f_hat = None
+        self._pxx = None
+        self._cutoff_mask = None
+        self._filtered_f_hat = None
+        self._denoised_X = None
 
-    def transform(self, signal: np.ndarray) -> np.ndarray:
+    def __init_threshold(self, threshold):
+        if isinstance(threshold, (str,)):
+            threshold = threshold.lower()
+            assert threshold in (
+                "auto-mean",
+                "auto-max",
+            ), "available auto threshold methods { auto-mean, auto-max, auto-min }"
+        return threshold
+
+    def _reshape_X(self, X: np.ndarray):
+        if len(X.shape) == 1:
+            X = X.reshape(-1, 1)
+        return X
+
+    def psd(self, f_hat: np.ndarray, tau: int) -> np.ndarray:
+        """Power Spectral Density
+
+        Parameters
+        ----------
+        f_hat : np.ndarray
+            Signal in Frequency Domain
+        tau : int
+            Interval
+
+        Returns
+        -------
+        np.ndarray
+            Power spectrum
         """
-        Perform denoising operation on signal.
+        return ((f_hat * np.conjugate(f_hat)) / tau).real
 
-        Args:
-            signal (np.ndarray): signal.
+    def transform(self, X: np.ndarray) -> np.ndarray:
+        """Apply PSD
 
-        Returns:
-            np.ndarray: cleaned signal.
+        Parameters
+        ----------
+        X : np.ndarray
+            Input matrix, signal in IOT Terms.
+
+        Returns
+        -------
+        np.ndarray
+            Denoised Signal
         """
-        self.signal = signal
-        self._l_signal = len(self.signal)
-        self._f_hat = np.fft.fft(self.signal, self._l_signal)
-        
-        if self._method == 'psd':
-            x = super().psd(self._f_hat, self._l_signal)
-        else:
-            x = super().magnitude(self._f_hat, self._l_signal)
+        X = self._reshape_X(X)
+        tau = len(X)
+        self._f_hat = np.fft.fft(X, tau, axis=0)
+        self._pxx = self.psd(self._f_hat, tau)
 
-        above_thresh_flag = x > self._threshold
-        cleaned_f_hat = self._f_hat * above_thresh_flag
+        if isinstance(self._threshold, str):
+            agg_func = getattr(np, self._threshold.split("-")[1])
+            self._threshold = agg_func(self._pxx[np.int16(np.floor(tau / 2)) :])
+        self._cutoff_mask = self._pxx > self._threshold
+        self._filtered_f_hat = self._f_hat * self._cutoff_mask
+        self._denoised_X = np.fft.ifft(self._filtered_f_hat, axis=0).real
+        return self._denoised_X
 
-        return np.fft.ifft(cleaned_f_hat).real  # type: ignore
+    @property
+    def threshold(self) -> Union[str, float, int]:
+        """Threshold calculated by the process
 
+        In Power spectrum after the half length it takes the aggregation of the values
+        and use that as a threshold to cutoff frequencies that are insignificant.
 
-if __name__ == '__main__':
+        Returns
+        -------
+        Union[str, float, int]
+            cutoff threshold value
+        """
+        return self._threshold
 
-    import matplotlib.pyplot as plt
-    from mightypy.make import sine_wave_from_timesteps
+    @property
+    def f_hat(self) -> Optional[np.ndarray]:
+        """FFT of input signal"""
+        return self._f_hat
 
-    time_step = 0.001
-    wave1, time1, freqs1 = sine_wave_from_timesteps(signal_freq=50, time_step=time_step)
-    wave2, time2, freqs2 = sine_wave_from_timesteps(signal_freq=70, time_step=time_step)
-    original_signal = wave1 + wave2
-
-    N = len(original_signal)
-
-    noisy_signal = original_signal + 2.5 * np.random.randn(N) + 2.8 * np.random.randn(N)  # adding random noise here
-
-    model = DenoiseFFT('psd', 100)
-    cleaned_signal = model.transform(noisy_signal)
-
-    plt.plot(original_signal, label='original')
-    plt.plot(noisy_signal, label='noisy')
-    plt.plot(cleaned_signal, label='cleaned')
-    plt.legend(loc='best')
-    plt.show()
-
-    model = DenoiseFFT('mag', 0.2)
-    cleaned_signal = model.transform(noisy_signal)
-
-    plt.plot(original_signal, label='original')
-    plt.plot(noisy_signal, label='noisy')
-    plt.plot(cleaned_signal, label='cleaned')
-    plt.legend(loc='best')
-    plt.show()
+    @property
+    def filtered_f_hat(self) -> Optional[np.ndarray]:
+        """filtered FFT of input signal"""
+        return self._filtered_f_hat

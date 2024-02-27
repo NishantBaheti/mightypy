@@ -11,6 +11,7 @@ __author__ = "Nishant Baheti"
 __copyright__ = "Nishant Baheti"
 __license__ = "MIT"
 
+
 class LinearRegression:
     """Linear Regression Model Class
 
@@ -23,8 +24,7 @@ class LinearRegression:
     """
 
     def __init__(self, alpha: float = 0.01, iterations: int = 10000):
-        """Constructor
-        """
+        """Constructor"""
         self.alpha = alpha
         self.iterations = iterations
         self._theta = None
@@ -127,13 +127,15 @@ class LinearRegression:
         else:
             raise Warning("Model is not trained yet. Theta is None.")
 
-    def train(self,
-              X: np.ndarray,
-              y: np.ndarray,
-              verbose: bool = True,
-              method: str = "SGD",
-              theta_precision: float = 0.001,
-              batch_size: int = 30) -> None:
+    def train(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        verbose: bool = True,
+        method: str = "SGD",
+        theta_precision: float = 0.001,
+        batch_size: int = 30,
+    ) -> None:
         """train model /theta estimator
 
         Args:
@@ -203,8 +205,8 @@ class LinearRegression:
                 # creating batch for this iteration
                 # X_batch = np.take(self._X, indices, axis=0)
                 # y_batch = np.take(self._y, indices, axis=0)
-                X_batch = self._X[indices,:]
-                y_batch = self._y[indices,:]
+                X_batch = self._X[indices, :]
+                y_batch = self._y[indices, :]
 
                 # calculate y_pred
                 y_pred = self.predict(X_batch)
@@ -247,8 +249,7 @@ class RidgeRegression:
     """
 
     def __init__(self, alpha: float = 0.01, iterations: int = 10000):
-        """Constructor
-        """
+        """Constructor"""
         self.alpha = alpha
         self.iterations = iterations
         self._theta = None
@@ -351,14 +352,16 @@ class RidgeRegression:
         else:
             raise Warning("Model is not trained yet. Theta is None.")
 
-    def train(self,
-              X: np.ndarray,
-              y: np.ndarray,
-              verbose: bool = True,
-              method: str = "SGD",
-              theta_precision: float = 0.001,
-              penalty: Union[float, int] = 1.0,
-              batch_size: int = 30) -> None:
+    def train(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        verbose: bool = True,
+        method: str = "SGD",
+        theta_precision: float = 0.001,
+        penalty: Union[float, int] = 1.0,
+        batch_size: int = 30,
+    ) -> None:
         """train model /theta estimator
 
         Args:
@@ -406,7 +409,7 @@ class RidgeRegression:
                 # theta_0 will not be effected by penalty
                 new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])  # type: ignore
                 # rest of theta's will be effected by it
-                new_theta_rest = self._theta[:, range(1, self._n)] * (1 - (penalty/self._m)) - (self.alpha * gradient[1:]) # type: ignore
+                new_theta_rest = self._theta[:, range(1, self._n)] * (1 - (penalty / self._m)) - (self.alpha * gradient[1:])  # type: ignore
 
                 new_theta = np.hstack((new_theta_0, new_theta_rest))
 
@@ -434,8 +437,8 @@ class RidgeRegression:
                 # X_batch = np.take(self._X, indices, axis=0)
                 # y_batch = np.take(self._y, indices, axis=0)
 
-                X_batch = self._X[indices,:]
-                y_batch = self._y[indices,:]
+                X_batch = self._X[indices, :]
+                y_batch = self._y[indices, :]
 
                 # calculate y_pred
                 y_pred = self.predict(X_batch)
@@ -444,11 +447,10 @@ class RidgeRegression:
 
                 # simultaneous operation
                 gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)  # type: ignore
-                new_theta_0 = self._theta[:,[0]] - (self.alpha * gradient[0])  # type: ignore
-                new_theta_rest = self._theta[:,range(1,self._n)] * (1 - (penalty/self._m) ) - (self.alpha * gradient[1:]) # type: ignore
+                new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])  # type: ignore
+                new_theta_rest = self._theta[:, range(1, self._n)] * (1 - (penalty / self._m)) - (self.alpha * gradient[1:])  # type: ignore
 
-                new_theta = np.hstack((new_theta_0,new_theta_rest))
-
+                new_theta = np.hstack((new_theta_0, new_theta_rest))
 
                 if np.isnan(np.sum(new_theta)) or np.isinf(np.sum(new_theta)):
                     print("breaking. found inf or nan.")
@@ -464,8 +466,11 @@ class RidgeRegression:
                 self._theta_history.append(self._theta[0])
 
         elif method == "NORMAL":
-            self._theta = np.linalg.inv(
-                self._X.T @ self._X + (penalty * np.identity(self._n))) @ self._X.T @ self._y
+            self._theta = (
+                np.linalg.inv(self._X.T @ self._X + (penalty * np.identity(self._n)))
+                @ self._X.T
+                @ self._y
+            )
 
         else:
             print("No Method Defined.")
@@ -483,8 +488,7 @@ class LassoRegression:
     """
 
     def __init__(self, alpha: float = 0.01, iterations: int = 10000):
-        """Constructor
-        """
+        """Constructor"""
         self.alpha = alpha
         self.iterations = iterations
         self._theta = None
@@ -587,14 +591,16 @@ class LassoRegression:
         else:
             raise Warning("Model is not trained yet. Theta is None.")
 
-    def train(self,
-              X: np.ndarray,
-              y: np.ndarray,
-              verbose: bool = True,
-              method: str = "SGD",
-              theta_precision: float = 0.001,
-              penalty: Union[int, float] = 1.0,
-              batch_size: int = 30) -> None:
+    def train(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        verbose: bool = True,
+        method: str = "SGD",
+        theta_precision: float = 0.001,
+        penalty: Union[int, float] = 1.0,
+        batch_size: int = 30,
+    ) -> None:
         """train model /theta estimator
 
         Args:
@@ -638,7 +644,7 @@ class LassoRegression:
 
                 gradient = np.mean((y_pred - self._y) * self._X, axis=0)  # type: ignore
                 new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])  # type: ignore
-                new_theta_rest = self._theta[:, range(1, self._n)] - (self.alpha * gradient[1:]) - (penalty/self._m)  # type: ignore
+                new_theta_rest = self._theta[:, range(1, self._n)] - (self.alpha * gradient[1:]) - (penalty / self._m)  # type: ignore
 
                 new_theta = np.hstack((new_theta_0, new_theta_rest))
 
@@ -679,7 +685,7 @@ class LassoRegression:
 
                 gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)  # type: ignore
                 new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])  # type: ignore
-                new_theta_rest = self._theta[:, range(1, self._n)] - (self.alpha * gradient[1:]) - (penalty/self._m)  # type: ignore
+                new_theta_rest = self._theta[:, range(1, self._n)] - (self.alpha * gradient[1:]) - (penalty / self._m)  # type: ignore
 
                 new_theta = np.hstack((new_theta_0, new_theta_rest))
 
@@ -815,15 +821,17 @@ class LogisticRegression:
         else:
             raise Warning("Model is not trained yet. Theta is None.")
 
-    def train(self,
-              X: np.ndarray,
-              y: np.ndarray,
-              verbose: bool = True,
-              method: str = "SGD",
-              theta_precision: float = 0.001,
-              batch_size: int = 30,
-              regularization: bool = False,
-              penalty: Union[float, int] = 1.0) -> None:
+    def train(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        verbose: bool = True,
+        method: str = "SGD",
+        theta_precision: float = 0.001,
+        batch_size: int = 30,
+        regularization: bool = False,
+        penalty: Union[float, int] = 1.0,
+    ) -> None:
         """train theta / estimator
 
         Args:
@@ -837,7 +845,7 @@ class LogisticRegression:
                         "SGD"(Stochastic Gradient Descent)
 
             theta_precision (float, optional): theta initialization value precision. Defaults to 0.001.
-            batch_size (int, optional): batch size only for BGD. Defaults to 30.            
+            batch_size (int, optional): batch size only for BGD. Defaults to 30.
             regularization (bool, optional): Apply Regularization. Defaults to False.
             penalty (Union[float, int], optional): regularization penalty only works for regularization=True. Defaults to 1.0.
         """
@@ -869,8 +877,9 @@ class LogisticRegression:
                 if regularization:
                     gradient = np.mean((y_pred - self._y) * self._X, axis=0)
                     new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])
-                    new_theta_rest = self._theta[:, range(
-                        1, self._n)] * (1 - (penalty/self._m)) - (self.alpha * gradient[1:])
+                    new_theta_rest = self._theta[:, range(1, self._n)] * (
+                        1 - (penalty / self._m)
+                    ) - (self.alpha * gradient[1:])
                     new_theta = np.hstack((new_theta_0, new_theta_rest))
 
                 else:
@@ -915,8 +924,9 @@ class LogisticRegression:
                 if regularization:
                     gradient = np.mean((y_pred - y_batch) * X_batch, axis=0)
                     new_theta_0 = self._theta[:, [0]] - (self.alpha * gradient[0])
-                    new_theta_rest = self._theta[:, range(
-                        1, self._n)] * (1 - (penalty/self._m)) - (self.alpha * gradient[1:])
+                    new_theta_rest = self._theta[:, range(1, self._n)] * (
+                        1 - (penalty / self._m)
+                    ) - (self.alpha * gradient[1:])
                     new_theta = np.hstack((new_theta_0, new_theta_rest))
 
                 else:
@@ -940,7 +950,9 @@ class LogisticRegression:
             print("No Method Defined.")
 
 
-def polynomial_regression(x: np.ndarray, y: np.ndarray, degree: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def polynomial_regression(
+    x: np.ndarray, y: np.ndarray, degree: int
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     fit Regression line with polynomial degree.
 
@@ -963,15 +975,17 @@ def polynomial_regression(x: np.ndarray, y: np.ndarray, degree: int) -> Tuple[np
         >>> plt.show()
     """
     a = np.polynomial.Polynomial.fit(x, y, deg=degree).convert().coef
-    
+
     if len(a) == 1:
         slope = a
         resid = np.array([0])
     else:
         slope = a[1:]
         resid = a[0]
-    fit_line = np.array([(x**(degree - i))*slope[i]
-                     for i in range(0, degree)]).sum(axis=0) + resid
+    fit_line = (
+        np.array([(x ** (degree - i)) * slope[i] for i in range(0, degree)]).sum(axis=0)
+        + resid
+    )
     return slope, resid, fit_line
 
 
@@ -984,10 +998,10 @@ def trend(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndar
         y (np.ndarray): dependent variable.
 
     Returns:
-        Tuple[np.ndarray, np.ndarray, np.ndarray]: slope, residual, trendline. 
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: slope, residual, trendline.
 
     Examples;
-        >>> import matplotlib.pyplot as plt 
+        >>> import matplotlib.pyplot as plt
         >>> x = np.array([1, 2, 3, 4, 5, 6, 7, 8])
         >>> y = np.array([1, 2, 3, 3, 4, 5, 7, 10])
         >>> s, r, t = trend(x, y)
@@ -1006,18 +1020,17 @@ if __name__ == "__main__":
     x = np.array([1, 2, 3, 4, 5, 6, 7, 8])
     y = np.array([1, 2, 3, 3, 4, 5, 7, 10])
     s, r, t = trend(x, y)
-    plt.plot(x, y, 'o', label='original', alpha=0.6)
-    plt.plot(x, t, '.-',  label='regression line')
+    plt.plot(x, y, "o", label="original", alpha=0.6)
+    plt.plot(x, t, ".-", label="regression line")
     plt.legend()
     plt.show(block=True)
-
 
     x = np.arange(1, 10)
     y = x**2 + x**3
     s, r, l = polynomial_regression(x, y, 1)
 
-    plt.plot(x, y, 'ko', label='original', alpha=0.6)
-    plt.plot(x, l, '.-',  label='regression line')
+    plt.plot(x, y, "ko", label="original", alpha=0.6)
+    plt.plot(x, l, ".-", label="regression line")
     plt.legend()
     plt.show()
 
