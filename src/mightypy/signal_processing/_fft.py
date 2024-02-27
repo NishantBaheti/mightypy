@@ -26,7 +26,7 @@ class PSDDenoiser:
     --------
         >>> import numpy as np
         >>> import matplotlib.pyplot as plt
-        >>> from sklearn.preprocessing import PSDDenoiser
+        >>> from mightypy.preprocessing import PSDDenoiser
         >>> rng = np.random.default_rng()
         >>> fs = 10e3
         >>> N = 100
