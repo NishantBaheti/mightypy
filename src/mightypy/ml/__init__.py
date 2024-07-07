@@ -16,7 +16,6 @@ from mightypy.ml._linear import (
 from mightypy.ml._tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from mightypy.ml._ensemble import (
-    AdaboostClassifier,
     RandomForestClassifier,
     RandomForestRegressor,
 )
@@ -34,10 +33,9 @@ __all__ = [
     "trend",
     "DecisionTreeClassifier",
     "DecisionTreeRegressor",
-    # "AdaboostClassifier",
     "RandomForestClassifier",
     "RandomForestRegressor",
     "moving_window_matrix",
     "sigmoid",
-    "ALS"
+    "ALS",
 ]
