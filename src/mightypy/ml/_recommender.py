@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-_TQDM_BAR_FORMAT = "{desc:<5.5} : {percentage:3.0f}%| {bar:30} {r_bar}"
+_TQDM_BAR_FORMAT = "{desc:<5.5} : {percentage:3.0f}%| {bar:50} {r_bar}"
 
 
 class ALS:
@@ -58,33 +58,46 @@ class ALS:
         ratings = matrix_df.values
         return ratings
 
-    def _fit_user_emb(self, user_idxs: int, ratings: np.ndarray):
-        user_idxs = (
-            [user_idxs] if not isinstance(user_idxs, (list, tuple)) else user_idxs
+    def _fit_user_emb(
+        self, n_users, ratings: np.ndarray, mask: np.ndarray, item_emb: np.ndarray
+    ):
+        user_pbar = tqdm(
+            total=n_users,
+            desc="Users ",
+            bar_format=_TQDM_BAR_FORMAT,
+            colour="Red",
+            leave=False,
         )
-        for user_idx in user_idxs:
-            mask_idx = self._mask[user_idx]
+        for user_idx in range(n_users):
+            mask_idx = mask[user_idx]
             self._user_emb[user_idx] = np.array(
-                (self._item_emb[:, mask_idx] @ ratings[user_idx, mask_idx]).T
+                (item_emb[:, mask_idx] @ ratings[user_idx, mask_idx]).T
                 @ np.linalg.inv(
-                    (self._item_emb @ self._item_emb.T)
-                    + (self._lambda * np.eye(self._dim_factors))
+                    (item_emb @ item_emb.T) + (self._lambda * np.eye(self._dim_factors))
+                ),
+            )
+            user_pbar.update(1)
+
+    def _fit_item_emb(
+        self, n_items, ratings: np.ndarray, mask: np.ndarray, user_emb: np.ndarray
+    ):
+        item_pbar = tqdm(
+            total=n_items,
+            desc="Items ",
+            bar_format=_TQDM_BAR_FORMAT,
+            colour="Green",
+            leave=False,
+        )
+        for item_idx in range(n_items):
+            mask_idx = mask[:, item_idx]
+            self._item_emb[:, item_idx] = np.array(
+                (user_emb.T[:, mask_idx] @ ratings[mask_idx, item_idx])
+                @ np.linalg.inv(
+                    (user_emb.T @ user_emb) + (self._lambda * np.eye(self._dim_factors))
                 ),
             )
 
-    def _fit_item_emb(self, item_idxs: int, ratings: np.ndarray):
-        item_idxs = (
-            [item_idxs] if not isinstance(item_idxs, (list, tuple)) else item_idxs
-        )
-        for item_idx in item_idxs:
-            mask_idx = self._mask[:, item_idx]
-            self._item_emb[:, item_idx] = np.array(
-                (self._user_emb.T[:, mask_idx] @ ratings[mask_idx, item_idx])
-                @ np.linalg.inv(
-                    (self._user_emb.T @ self._user_emb)
-                    + (self._lambda * np.eye(self._dim_factors))
-                ),
-            )
+            item_pbar.update(1)
 
     def fit(
         self,
@@ -93,37 +106,36 @@ class ALS:
         item_col: str = "item_id",
         score_col: str = "ratings",
     ):
-        ratings = self.data_preparation(dataframe, user_col, item_col, score_col)
+        self._ratings = self.data_preparation(dataframe, user_col, item_col, score_col)
 
-        n_users, n_items = ratings.shape
+        n_users, n_items = self._ratings.shape
 
         self._user_emb = np.random.rand(n_users, self._dim_factors) * 1e-3
         self._item_emb = np.random.rand(self._dim_factors, n_items) * 1e-3
 
-        self._mask = ~np.isnan(ratings)
+        self._mask = ~np.isnan(self._ratings)
 
         self._iter_losses = []
 
-        pbar = tqdm(total=self._n_iter, desc="Training ", bar_format=_TQDM_BAR_FORMAT)
+        pbar = tqdm(
+            total=self._n_iter,
+            desc="Training ",
+            bar_format=_TQDM_BAR_FORMAT,
+            colour="Blue",
+            leave=False,
+        )
 
         for iter_ in range(self._n_iter):
 
-            user_pbar = tqdm(total=n_users, desc="Users ", bar_format=_TQDM_BAR_FORMAT)
-            for user_idx in range(n_users):
-                self._fit_user_emb(user_idx, ratings)
-                user_pbar.update(1)
+            self._fit_user_emb(n_users, self._ratings, self._mask, self._item_emb)
+            self._fit_item_emb(n_items, self._ratings, self._mask, self._user_emb)
 
-            item_pbar = tqdm(total=n_items, desc="Items ", bar_format=_TQDM_BAR_FORMAT)
-            for item_idx in range(n_items):
-                self._fit_item_emb(item_idx, ratings)
-                item_pbar.update(1)
-
-            loss = self._loss(ratings, self._user_emb, self._item_emb, self._mask)
-
-            print("Loss over iteration : ", iter_, loss)
+            loss = self._loss(self._ratings, self._user_emb, self._item_emb, self._mask)
             self._iter_losses.append(loss)
 
             pbar.update(1)
+
+            print(" epoch :", iter_ + 1, "loss :", round(loss, 3))
         return self._iter_losses
 
 
@@ -134,11 +146,8 @@ if __name__ == "__main__":
 
     model = ALS(dim_factors=500, n_iter=10, lambda_=1.0)
     losses = model.fit(
-        dataframe=df,
-        user_col="userId",
-        item_col="movieId",
-        score_col="rating"
+        dataframe=df, user_col="userId", item_col="movieId", score_col="rating"
     )
 
-    plt.plot(losses)
+    plt.plot(losses, 'o-')
     plt.savefig("/workspaces/mightypy/plots/loss_plot.png")
