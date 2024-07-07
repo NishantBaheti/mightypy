@@ -34,7 +34,7 @@ __all__ = [
     "trend",
     "DecisionTreeClassifier",
     "DecisionTreeRegressor",
-    "AdaboostClassifier",
+    # "AdaboostClassifier",
     "RandomForestClassifier",
     "RandomForestRegressor",
     "moving_window_matrix",
