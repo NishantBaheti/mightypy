@@ -22,6 +22,7 @@ from mightypy.ml._ensemble import (
 )
 
 from mightypy.ml._utils import moving_window_matrix, sigmoid
+from mightypy.ml._recommender import ALS
 
 
 __all__ = [
@@ -38,4 +39,5 @@ __all__ = [
     "RandomForestRegressor",
     "moving_window_matrix",
     "sigmoid",
+    "ALS"
 ]
