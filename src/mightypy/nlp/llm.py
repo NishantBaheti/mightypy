@@ -198,12 +198,14 @@ class LLM(nn.Module):
 
     def forward(self, X: torch.Tensor):
         X = self._pe.forward(X)  # (T, M)
-        print(X.shape)
+        # print(X.shape)
         X = X.repeat(self._n_heads, 1, 1)  # (H, T, M)
-        print(X.shape)
+        # print(X.shape)
         for _ in range(self._n_x):
             X = self._repeat_block(X)
-        X = self._linear(X)  # (H, T, M)
+
+        # flatten head and tokens # (H, T, M) -> (H*T, M)
+        X = self._linear(X.view(-1, self._d_model))  
 
         # we need logits so removing softmax
         # X = torch.softmax(X, dim=0)
@@ -213,22 +215,20 @@ class LLM(nn.Module):
         pass
 
 
-
-
 def train(data_loader, llm_model, emb_model, loss_fn, optimizer, epochs, device):
     for _ in range(epochs):
         running_loss = 0.0
-        for X, y in data_loader:
-            input_embeddings = emb_model.embedding(X)
+        for X_idx, y_idx in data_loader:
+            input_embeddings = emb_model.embedding(X_idx)
             pred_logits = llm_model.forward(input_embeddings)
-            print(pred_logits.shape, y.shape)
-            loss = loss_fn(pred_logits, y.to(device))  # Compute loss
+            # print(pred_logits.shape, y_idx.shape)
+            loss = loss_fn(pred_logits.mean(axis=0), y_idx.to(device).view(-1)[0])  # Compute loss
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
             running_loss += loss.item()
-            # print(loss.item())
+            print(loss.item())
         print(f"Epoch Loss: {running_loss:.6f}")
 
 
@@ -245,6 +245,7 @@ if __name__ == "__main__":
     D_KEY = 7
     D_QUERY = 7
     N_X = 5
+    CONTEXT_LENGTH = 100
     
     EPOCHS = 10
     device = "cpu"
@@ -254,7 +255,7 @@ if __name__ == "__main__":
     tokenizer = PyBytePairTokenizer()
     VOCAB_SIZE = tokenizer.size
     url = "https://raw.githubusercontent.com/NishantBaheti/tokkit/refs/heads/main/datasets/raw/combined.txt"
-    dataloader = CustomDatasetLoader(url, tokenizer)
+    dataloader = CustomDatasetLoader(url, tokenizer, context_length=CONTEXT_LENGTH)
     embedding_model = Word2Vec(VOCAB_SIZE, D_MODEL)
     # for X, y in dataloader:
     #     input_tokens = X

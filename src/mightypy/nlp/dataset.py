@@ -35,7 +35,7 @@ class CustomDatasetLoader(Dataset):
             path = self._save_file_local(path)
         self.vocab_size = tokenizer.size
         self.raw_data = data_loader(path.encode("utf-8"))
-        self.tokens = self.raw_data # tokenizer.fit(self.raw_data)
+        self.tokens = tokenizer.encode_corpus(self.raw_data)
         self.tokens_tensor = torch.tensor(self.tokens, dtype=torch.long)
 
     def __len__(self):
