@@ -45,7 +45,7 @@ class CustomDatasetLoader(Dataset):
         idx = random.randint(0, len(self.tokens) - self.context_length - 1)
         return (
             torch.tensor(self.tokens[idx : idx + self.context_length]),
-            torch.tensor([self.tokens[idx + 1]]),
+            torch.tensor([self.tokens[idx + self.context_length]]) # torch.tensor([self.tokens[idx + 1: idx + self.context_length + 1]]),
         )
 
 

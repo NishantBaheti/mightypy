@@ -64,15 +64,15 @@ class MultiHeadAttention(nn.Module):
 
     def forward(self, X: torch.Tensor):
 
-        w_q = (
+        w_q = nn.Parameter(
             torch.rand(self._n_heads, self._d_query, self._d_model, requires_grad=True)
             * 1e-1
         )  # (H, Q, M)
-        w_k = (
+        w_k = nn.Parameter(
             torch.rand(self._n_heads, self._d_key, self._d_model, requires_grad=True)
             * 1e-1
         )  # (H, K, M)
-        w_v = (
+        w_v = nn.Parameter(
             torch.rand(self._n_heads, self._d_model, self._d_model, requires_grad=True)
             * 1e-1
         )  # (H, V, M)
@@ -137,13 +137,15 @@ class PositionalEncoding(nn.Module):
 class FFN(nn.Module):
     def __init__(self, in_units, out_units):
         super().__init__()
-        self.linear = torch.nn.Linear(in_units, out_units, bias=True)
+        self.linear1 = torch.nn.Linear(in_units, in_units * 4, bias=True)
         self.relu = torch.nn.ReLU()
+        self.linear2 = torch.nn.Linear(in_units * 4, out_units, bias=True)
 
     def forward(self, X):
         # X = (H, T, M)
-        X = self.linear(X)
+        X = self.linear1(X)
         X = self.relu(X)
+        X = self.linear2(X)
         return X
 
 
@@ -205,13 +207,13 @@ class LLM(nn.Module):
             X = self._repeat_block(X)
 
         # flatten head and tokens # (H, T, M) -> (H*T, M)
-        X = self._linear(X.view(-1, self._d_model))  
+        X = self._linear(X) # .view(-1, self._d_model)  
 
         # we need logits so removing softmax
         # X = torch.softmax(X, dim=0)
         return X
 
-    def generate(self, context, max_tokens):
+    def generate(self, context, max_tokens, top_p, top_k, temperature):
         pass
 
 
@@ -221,8 +223,8 @@ def train(data_loader, llm_model, emb_model, loss_fn, optimizer, epochs, device)
         for X_idx, y_idx in data_loader:
             input_embeddings = emb_model.embedding(X_idx)
             pred_logits = llm_model.forward(input_embeddings)
-            # print(pred_logits.shape, y_idx.shape)
-            loss = loss_fn(pred_logits.mean(axis=0), y_idx.to(device).view(-1)[0])  # Compute loss
+            print(pred_logits.shape, y_idx.shape)
+            loss = loss_fn(pred_logits.view(-1, pred_logits.shape[-1]), y_idx.view(-1))  # Compute loss
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -230,7 +232,6 @@ def train(data_loader, llm_model, emb_model, loss_fn, optimizer, epochs, device)
             running_loss += loss.item()
             print(loss.item())
         print(f"Epoch Loss: {running_loss:.6f}")
-
 
 
 # @torch.no_grad()
@@ -253,6 +254,7 @@ if __name__ == "__main__":
     # input_sentence = "Hello, how are you?"
 
     tokenizer = PyBytePairTokenizer()
+    tokenizer.fit()
     VOCAB_SIZE = tokenizer.size
     url = "https://raw.githubusercontent.com/NishantBaheti/tokkit/refs/heads/main/datasets/raw/combined.txt"
     dataloader = CustomDatasetLoader(url, tokenizer, context_length=CONTEXT_LENGTH)
