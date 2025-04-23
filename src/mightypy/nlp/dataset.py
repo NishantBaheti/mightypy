@@ -1,4 +1,4 @@
-import random
+# import random
 import torch
 import os
 from pathlib import Path
@@ -8,10 +8,11 @@ from torch.utils.data import Dataset
 from tokkit import data_loader
 
 
-class CustomDatasetLoader(Dataset):
-    def __init__(self, path, tokenizer, context_length=5, dataset_path = "datasets"):
+class CustomDataset(Dataset):
+    def __init__(self, path, tokenizer, context_length=5, dataset_path = "datasets", device="cpu"):
         self.context_length = context_length
         self.dataset_path = dataset_path
+        self.device = device
         self._load(path, tokenizer)
         
 
@@ -42,19 +43,23 @@ class CustomDatasetLoader(Dataset):
         return max(0, len(self.tokens) - self.context_length - 1)
 
     def __getitem__(self, idx):
-        idx = random.randint(0, len(self.tokens) - self.context_length - 1)
         return (
-            torch.tensor(self.tokens[idx : idx + self.context_length]),
-            torch.tensor([self.tokens[idx + self.context_length]]) # torch.tensor([self.tokens[idx + 1: idx + self.context_length + 1]]),
+            torch.tensor(self.tokens[idx : idx + self.context_length]).to(self.device),
+            torch.tensor([self.tokens[idx + self.context_length]]).to(self.device)
         )
 
 
 if __name__ == "__main__":
     from tokkit import PyBytePairTokenizer
+    from torch.utils.data import DataLoader
+
     tokenizer = PyBytePairTokenizer()
     url = "https://raw.githubusercontent.com/NishantBaheti/tokkit/refs/heads/main/datasets/raw/combined.txt"
-    dataloader = CustomDatasetLoader(url, tokenizer)
-    for X, y in dataloader:
-        print(X, y)
+    dataset = CustomDataset(url, tokenizer)
+    dataloader = DataLoader(dataset=dataset, batch_size=32, shuffle=True)
+    for X_batch, y_batch in dataloader:
+        print(X_batch, y_batch)
+        for x, y in zip(X_batch, y_batch):
+            print(tokenizer.decode(x), tokenizer.decode(y))
         break
 
