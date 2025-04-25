@@ -5,7 +5,6 @@ LLM
 
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
 from tokkit import PyBytePairTokenizer
 from mightypy.nlp.dataset import CustomDataset
 
@@ -206,13 +205,16 @@ class LLM(nn.Module):
     def forward(self, X: torch.Tensor):
         X = self._pe.forward(X)  # (T, M)
         # print(X.shape)
+
         X = X.repeat(self._n_heads, 1, 1)  # (H, T, M)
         # print(X.shape)
+        
         for _ in range(self._n_x):
             X = self._repeat_block(X)
-
+        
+        X = self._linear(X) 
         # flatten head and tokens # (H, T, M) -> (H*T, M)
-        X = self._linear(X) # .view(-1, self._d_model)
+        # X = X.view(-1, self._d_model)
 
         # we need logits so removing softmax
         # X = torch.softmax(X, dim=0)
@@ -254,54 +256,3 @@ def train(data_loader, llm_model, emb_model, loss_fn, optimizer, epochs, device)
 # @torch.no_grad()
 # def test():
 #     pass
-
-
-if __name__ == "__main__":
-    
-    N_HEADS = 6
-    D_MODEL = 100
-    D_KEY = 7
-    D_QUERY = 7
-    N_X = 5
-    CONTEXT_LENGTH = 1000
-    
-    EPOCHS = 10
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(device)
-
-    # input_sentence = "Hello, how are you?"
-
-    tokenizer = PyBytePairTokenizer()
-    # tokenizer.fit()
-    VOCAB_SIZE = tokenizer.size
-    url = "https://raw.githubusercontent.com/NishantBaheti/tokkit/refs/heads/main/datasets/raw/combined.txt"
-    dataset = CustomDataset(url, tokenizer, context_length=CONTEXT_LENGTH, device=device)
-    
-    # dataloader = DataLoader(dataset, 32, shuffle=True)
-    # Will enable dataloader .. too many dimensions to handle
-    dataloader = dataset 
-    
-    
-    embedding_model = Word2Vec(VOCAB_SIZE, D_MODEL, device=device)
-    # for X, y in dataloader:
-    #     input_tokens = X
-    #     break
-    
-    llm_model = LLM(
-        n_heads = N_HEADS,
-        d_model = D_MODEL,
-        d_key = D_KEY,
-        d_query = D_QUERY,
-        n_x = N_X,
-        vocab_size = VOCAB_SIZE,
-        device=device
-    )
-    loss_fn = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(llm_model.parameters(), lr=0.001)
-
-    # out = model.forward(input_embeddings)
-    # print(out.shape)
-    # print(out.sum(dim=0))
-
-    train(dataloader, llm_model, embedding_model, loss_fn, optimizer, EPOCHS, device)
-
