@@ -23,7 +23,7 @@ class CustomDataset(Dataset):
         if path.startswith("http"):
             path = self.downloader.save_file_local(path)
         self.vocab_size = tokenizer.size
-        self.raw_data = data_loader(path.encode("utf-8"))
+        self.raw_data = data_loader(path)
         self.tokens = tokenizer.encode_corpus(self.raw_data)
         self.tokens_tensor = torch.tensor(self.tokens, dtype=torch.long)
 

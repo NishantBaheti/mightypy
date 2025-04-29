@@ -102,23 +102,26 @@ class PositionalEmbedding(nn.Module):
     pass
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, scale=10_000, device="cpu"):
+    def __init__(self, d_model, context_len= 10_000, scale=10_000, device="cpu"):
         super().__init__()
         self.scale = scale
         self._device = device
+        self._context_len = context_len
+        self._d_model = d_model
+        self.pe = self._positional_encoding()
 
-    def _positional_encoding(self, n_tokens, d_model):
+    def _positional_encoding(self,):
         """
         * Rows - Positions (sentence length, number of tokens in input sentence)
         * Columns - Dimensions (Dimensions of embedding or models)
         """
-        p = torch.zeros((n_tokens, d_model), device=self._device)
-        positions = torch.arange(n_tokens).unsqueeze(1)
+        p = torch.zeros((self._context_len, self._d_model), device=self._device)
+        positions = torch.arange(self._context_len).unsqueeze(1)
         denominator = 1 / torch.pow(
-            self.scale, torch.arange(0, d_model, 2).unsqueeze(0) / d_model
+            self.scale, torch.arange(0, self._d_model, 2).unsqueeze(0) / self._d_model
         )
 
-        if d_model % 2 == 0:
+        if self._d_model % 2 == 0:
             end_idx = denominator.shape[1]
         else:
             end_idx = denominator.shape[1] - 1
@@ -131,9 +134,8 @@ class PositionalEncoding(nn.Module):
         return p
 
     def forward(self, X):
-        n_tokens, d_model = X.shape
-        pe = self._positional_encoding(n_tokens, d_model)
-        return X + pe
+        shape = X.shape
+        return X + self.pe[:shape[0],:shape[1]]
 
 
 class FFN(nn.Module):
@@ -196,7 +198,7 @@ class LLM(nn.Module):
         self._d_query = d_query
         self._n_x = n_x
         self._vocab_size = vocab_size
-        self._pe = PositionalEncoding(scale= 10_000, device=self._device)
+        self._pe = PositionalEncoding(d_model=self._d_model, device=self._device)
         self._linear = torch.nn.Linear(self._d_model, self._vocab_size, bias=False, device=self._device)
         self._repeat_block = RepeatBlock(
             self._n_heads, self._d_model, self._d_key, self._d_query, device=self._device
@@ -219,9 +221,6 @@ class LLM(nn.Module):
         # we need logits so removing softmax
         # X = torch.softmax(X, dim=0)
         return X
-
-    def generate(self, context, max_tokens, top_p, top_k, temperature):
-        pass
 
 
 def train(data_loader, llm_model, emb_model, loss_fn, optimizer, epochs, device):
@@ -251,6 +250,41 @@ def train(data_loader, llm_model, emb_model, loss_fn, optimizer, epochs, device)
             print(loss.item())
             
         print(f"Epoch Loss: {running_loss:.6f}")
+
+@torch.no_grad()
+def generate(llm_model: LLM, emb_model: Word2Vec, tokenizer: PyBytePairTokenizer, context, max_tokens, top_k, temperature, device="cpu"):
+    idxs = torch.tensor(tokenizer.encode(context), dtype=torch.int64).to(device)
+    for _ in range(max_tokens):
+        embeddings = emb_model.embedding(idxs).to(device)
+        logits = llm_model.forward(embeddings)  # (H, T, M)
+
+        # as it is an autoregressive model, we need to get the last token's logits
+        final_tokens_logits = logits[:, -1, :]  # Last token's logits from the last layer (H, M)
+        
+        # # top k sampling
+        # # torch.topk returns top k values sorted and their indices for each head
+        top_values, _ = torch.topk(final_tokens_logits, top_k, dim=-1)
+
+        # print(final_tokens_logits.shape, top_values.shape, top_indices.shape)
+        least_values = top_values[:, [-1]]
+        print(top_values)
+        final_tokens_logits[final_tokens_logits < least_values] = float("-inf")
+        
+        print(final_tokens_logits)
+
+        # Apply temperature scaling
+        # higher the temperature, more scaled down the logits and more random the output
+        final_probs = torch.softmax(final_tokens_logits / temperature, dim=-1)
+
+        next_token = torch.multinomial(final_probs, num_samples=1)
+
+        # print(idxs.shape, next_token.shape)
+        
+        # Append next token to sequence
+        idxs = torch.cat([idxs, next_token.view(-1)], dim=0)
+    return tokenizer.decode(idxs.cpu().tolist())  # tokenizer.decode(idxs.cpu().numpy())
+
+
 
 
 # @torch.no_grad()
