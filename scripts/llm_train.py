@@ -28,7 +28,7 @@ VOCAB_SIZE = tokenizer.size
 print("Vocab Size", VOCAB_SIZE)
 
 dataset = CustomDataset(path, tokenizer, context_length=CONTEXT_LENGTH, device=device)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=100, shuffle=True)
 
 embedding_model = Word2Vec(VOCAB_SIZE, D_MODEL, device=device)
 
@@ -48,6 +48,6 @@ optimizer = torch.optim.Adam(llm_model.parameters(), lr=0.001)
 # print(out.shape)
 # print(out.sum(dim=0))
 
-# train(dataloader, llm_model, embedding_model, loss_fn, optimizer, EPOCHS, device)
+train(dataloader, llm_model, embedding_model, loss_fn, optimizer, EPOCHS, device)
 
 print(generate(llm_model, embedding_model, tokenizer, "Hello", 10, 5, 1.0, device=device))
