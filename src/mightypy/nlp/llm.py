@@ -6,8 +6,6 @@ LLM
 import torch
 from torch import nn
 from tokkit import PyBytePairTokenizer
-from mightypy.nlp.dataset import CustomDataset
-
 
 class Word2Vec(nn.Module):
     def __init__(self, vocab_size, embedding_dims, device="cpu"):
@@ -220,23 +218,25 @@ def train(data_loader, llm_model: LLM, emb_model, loss_fn, optimizer, epochs, de
             input_embeddings = emb_model.embedding(X_idx).to(device) # (B, T, M)
             # print(input_embeddings.shape)
 
-            pred_logits = llm_model.forward(input_embeddings) # (B, T, C)
+            pred_logits = llm_model.forward(input_embeddings) # (B, T, C) -> (B, 1, C)
 
             # (B, T, C) -> (B, C, T)
-            pred_logits = pred_logits.permute(0, 2, 1)
+            pred_logits = pred_logits.permute(0, 2, 1) # (B, C, 1)
 
             # B, C, T = pred_logits.shape
             # y_idx = y_idx.repeat(B, T)
-            print(pred_logits.shape, y_idx.shape)
+
+            # print(pred_logits.shape, y_idx.shape)
             
-            loss = loss_fn(pred_logits, y_idx)  # Compute loss
+            loss = loss_fn(pred_logits, y_idx)  # Compute loss (B, C, 1) , (B, 1)
             
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
             running_loss += loss.item()
-            print(loss.item())
+            
+            # print(loss.item())
             
         print(f"Epoch Loss: {running_loss:.6f}")
 
