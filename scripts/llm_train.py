@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from mightypy.datautils.download import FileDownloader
 from mightypy.nlp.dataset import CustomDataset
-from mightypy.nlp.llm import LLM, Word2Vec, train
+from mightypy.nlp.llm import LLM, Word2Vec, train, generate
 from tokkit import PyBytePairTokenizer, data_loader
 from torch.utils.data import DataLoader
 
@@ -21,9 +21,9 @@ print(device)
 url = "https://raw.githubusercontent.com/NishantBaheti/tokkit/refs/heads/main/datasets/raw/combined.txt"
 path = FileDownloader().save_file_local(url)
 
-corpus = data_loader(path.encode("utf-8"))
+corpus = data_loader(path)
 tokenizer = PyBytePairTokenizer()
-tokenizer.fit(corpus, max_vocab_size=1000, n_iter=100)
+# tokenizer.fit(corpus, max_vocab_size=1000, n_iter=0)
 VOCAB_SIZE = tokenizer.size
 print("Vocab Size", VOCAB_SIZE)
 
@@ -48,5 +48,6 @@ optimizer = torch.optim.Adam(llm_model.parameters(), lr=0.001)
 # print(out.shape)
 # print(out.sum(dim=0))
 
-train(dataloader, llm_model, embedding_model, loss_fn, optimizer, EPOCHS, device)
+# train(dataloader, llm_model, embedding_model, loss_fn, optimizer, EPOCHS, device)
 
+print(generate(llm_model, embedding_model, tokenizer, "Hello", 10, 5, 1.0, device=device))
