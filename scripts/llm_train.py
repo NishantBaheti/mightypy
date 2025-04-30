@@ -10,9 +10,9 @@ from torch.utils.data import DataLoader
 N_HEADS = 6
 D_MODEL = 100
 D_KEY = 7
-D_QUERY = 7
+D_VALUE = 7
 N_X = 5
-CONTEXT_LENGTH = 1000
+CONTEXT_LENGTH = 10
 
 EPOCHS = 10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -28,7 +28,7 @@ VOCAB_SIZE = tokenizer.size
 print("Vocab Size", VOCAB_SIZE)
 
 dataset = CustomDataset(path, tokenizer, context_length=CONTEXT_LENGTH, device=device)
-dataloader = dataset
+dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 embedding_model = Word2Vec(VOCAB_SIZE, D_MODEL, device=device)
 
@@ -36,7 +36,7 @@ llm_model = LLM(
     n_heads = N_HEADS,
     d_model = D_MODEL,
     d_key = D_KEY,
-    d_query = D_QUERY,
+    d_value = D_VALUE,
     n_x = N_X,
     vocab_size = VOCAB_SIZE,
     device=device

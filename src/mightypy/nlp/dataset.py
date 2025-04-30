@@ -16,9 +16,9 @@ class CustomDataset(Dataset):
         self.context_length = context_length
         self.dataset_path = dataset_path
         self.device = device
-        self._load(path, tokenizer)
         self.downloader = FileDownloader(self.dataset_path)
-
+        self._load(path, tokenizer)
+        
     def _load(self, path, tokenizer):
         if path.startswith("http"):
             path = self.downloader.save_file_local(path)
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     tokenizer = PyBytePairTokenizer()
     url = "https://raw.githubusercontent.com/NishantBaheti/tokkit/refs/heads/main/datasets/raw/combined.txt"
-    dataset = CustomDataset(url, tokenizer)
+    dataset = CustomDataset(url, tokenizer, context_length=100)
     dataloader = DataLoader(dataset=dataset, batch_size=32, shuffle=True)
     for X_batch, y_batch in dataloader:
         print(X_batch, y_batch)

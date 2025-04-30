@@ -19,8 +19,6 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
-    "Intended Audience :: Financial and Insurance Industry",
-    "Intended Audience :: Healthcare Industry",
     "Intended Audience :: Information Technology"
 ]
 
@@ -30,7 +28,8 @@ dependencies = [
     "matplotlib==3.10.1",
     "tqdm==4.67.1",
     "tokkit==0.0.5",
-    "torch==2.6.0"
+    "torch==2.6.0",
+    "requests==2.32.3"
 ]
 
 [project.optional-dependencies] # Optional
