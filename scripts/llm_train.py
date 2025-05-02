@@ -23,7 +23,7 @@ path = FileDownloader().save_file_local(url)
 
 corpus = data_loader(path)
 tokenizer = PyBytePairTokenizer()
-# tokenizer.fit(corpus, max_vocab_size=1000, n_iter=0)
+tokenizer.fit(corpus, max_vocab_size=1000, n_iter=0)
 VOCAB_SIZE = tokenizer.size
 print("Vocab Size", VOCAB_SIZE)
 

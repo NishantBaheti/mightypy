@@ -6,6 +6,7 @@ LLM
 import torch
 from torch import nn
 from tokkit import PyBytePairTokenizer
+from tqdm import tqdm
 
 class Word2Vec(nn.Module):
     def __init__(self, vocab_size, embedding_dims, device="cpu"):
@@ -212,7 +213,7 @@ class LLM(nn.Module):
 def train(data_loader, llm_model: LLM, emb_model, loss_fn, optimizer, epochs, device):
     for _ in range(epochs):
         running_loss = 0.0
-        for X_idx, y_idx in data_loader:
+        for X_idx, y_idx in tqdm(data_loader):
             # print(X_idx.shape, y_idx.shape) (B, T), (B, 1)
 
             input_embeddings = emb_model.embedding(X_idx).to(device) # (B, T, M)

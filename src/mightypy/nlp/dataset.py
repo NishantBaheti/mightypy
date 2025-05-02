@@ -39,12 +39,13 @@ class CustomDataset(Dataset):
 if __name__ == "__main__":
     from tokkit import PyBytePairTokenizer
     from torch.utils.data import DataLoader
+    from tqdm import tqdm
 
     tokenizer = PyBytePairTokenizer()
     url = "https://raw.githubusercontent.com/NishantBaheti/tokkit/refs/heads/main/datasets/raw/combined.txt"
     dataset = CustomDataset(url, tokenizer, context_length=100)
     dataloader = DataLoader(dataset=dataset, batch_size=32, shuffle=True)
-    for X_batch, y_batch in dataloader:
+    for X_batch, y_batch in tqdm(dataloader):
         print(X_batch, y_batch)
         for x, y in zip(X_batch, y_batch):
             print(tokenizer.decode(x), tokenizer.decode(y))
