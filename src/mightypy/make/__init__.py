@@ -3,7 +3,6 @@ mightypy.make
 ===============
 """
 
-
 from mightypy.make._dataset import (
     spiral_data,
     rotation_matrix_2d,

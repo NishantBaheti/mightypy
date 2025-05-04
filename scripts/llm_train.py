@@ -47,6 +47,7 @@ optimizer = torch.optim.Adam(llm_model.parameters(), lr=0.001)
 # out = model.forward(input_embeddings)
 # print(out.shape)
 # print(out.sum(dim=0))
+print(generate(llm_model, embedding_model, tokenizer, "Hello", 10, 5, 1.0, device=device))
 
 train(dataloader, llm_model, embedding_model, loss_fn, optimizer, EPOCHS, device)
 

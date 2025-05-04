@@ -12,13 +12,15 @@ from mightypy.datautils.download import FileDownloader
 
 
 class CustomDataset(Dataset):
-    def __init__(self, path, tokenizer, context_length=5, dataset_path = "datasets", device="cpu"):
+    def __init__(
+        self, path, tokenizer, context_length=5, dataset_path="datasets", device="cpu"
+    ):
         self.context_length = context_length
         self.dataset_path = dataset_path
         self.device = device
         self.downloader = FileDownloader(self.dataset_path)
         self._load(path, tokenizer)
-        
+
     def _load(self, path, tokenizer):
         if path.startswith("http"):
             path = self.downloader.save_file_local(path)
@@ -33,8 +35,9 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         return (
             torch.tensor(self.tokens[idx : idx + self.context_length]).to(self.device),
-            torch.tensor([self.tokens[idx + self.context_length]]).to(self.device)
+            torch.tensor([self.tokens[idx + self.context_length]]).to(self.device),
         )
+
 
 if __name__ == "__main__":
     from tokkit import PyBytePairTokenizer
@@ -50,4 +53,3 @@ if __name__ == "__main__":
         for x, y in zip(X_batch, y_batch):
             print(tokenizer.decode(x), tokenizer.decode(y))
         break
-
