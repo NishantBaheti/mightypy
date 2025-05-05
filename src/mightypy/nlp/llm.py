@@ -105,7 +105,7 @@ class BatchMultiHeadAttention(nn.Module):
             # and can be picked like mask[:, :, :T, :T]
             # more efficient , might look at it in the future
             mask = (
-                torch.tril(torch.ones(T, T)).unsqueeze(0).unsqueeze(0)
+                torch.tril(torch.ones(T, T, device=self._device)).unsqueeze(0).unsqueeze(0)
             )  # (T, T) -> (1, T, T) -> (1, 1, T, T)
             scaled_dot_product = scaled_dot_product.masked_fill(
                 mask == 0, float("-inf")
@@ -188,7 +188,7 @@ class BatchMultiHeadAttentionV2(nn.Module):
             # and can be picked like mask[:, :, :T, :T]
             # more efficient , might look at it in the future
             mask = (
-                torch.tril(torch.ones(T, T)).unsqueeze(0).unsqueeze(0)
+                torch.tril(torch.ones(T, T, device=self._device)).unsqueeze(0).unsqueeze(0)
             )  # (T, T) -> (1, T, T) -> (1, 1, T, T)
             scaled_dot_product = scaled_dot_product.masked_fill(
                 mask == 0, float("-inf")
