@@ -14,6 +14,7 @@ D_VALUE = 7
 N_X = 5
 CONTEXT_LENGTH = 10
 DROPOUT=0.5
+VOCAB_SIZE=500
 
 EPOCHS = 10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -24,7 +25,7 @@ path = FileDownloader().save_file_local(url)
 
 corpus = data_loader(path)
 tokenizer = PyBytePairTokenizer()
-tokenizer.fit(corpus, max_vocab_size=1000, n_iter=0)
+tokenizer.fit(corpus, max_vocab_size=VOCAB_SIZE, n_iter=1e3)
 VOCAB_SIZE = tokenizer.size
 print("Vocab Size", VOCAB_SIZE)
 
@@ -43,8 +44,11 @@ llm_model = LLM(
     dropout_p=DROPOUT,
     device=device
 )
+
+print(llm_model.total_params)
+
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(llm_model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(llm_model.parameters(), lr=0.001, eps=1e-10, betas=())
 
 # out = model.forward(input_embeddings)
 # print(out.shape)

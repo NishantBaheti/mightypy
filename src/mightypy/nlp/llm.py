@@ -370,7 +370,8 @@ class LLM(nn.Module):
         # X = torch.softmax(X, dim=0)
         return X[:, [-1], :]
     
-    def total_params(self):
+    @property
+    def total_params(self) -> int:
         overall_params = 0 
         for param in self.parameters():
             params_count = param.numel()
