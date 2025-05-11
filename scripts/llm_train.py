@@ -13,6 +13,7 @@ D_KEY = 7
 D_VALUE = 7
 N_X = 5
 CONTEXT_LENGTH = 10
+DROPOUT=0.5
 
 EPOCHS = 10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -39,6 +40,7 @@ llm_model = LLM(
     d_value = D_VALUE,
     n_x = N_X,
     vocab_size = VOCAB_SIZE,
+    dropout_p=DROPOUT,
     device=device
 )
 loss_fn = nn.CrossEntropyLoss()
@@ -47,6 +49,7 @@ optimizer = torch.optim.Adam(llm_model.parameters(), lr=0.001)
 # out = model.forward(input_embeddings)
 # print(out.shape)
 # print(out.sum(dim=0))
+
 print(generate(llm_model, embedding_model, tokenizer, "Hello", 10, 5, 1.0, device=device))
 
 train(dataloader, llm_model, embedding_model, loss_fn, optimizer, EPOCHS, device)

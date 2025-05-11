@@ -273,7 +273,7 @@ class FFN(nn.Module):
 
 
 class RepeatBlock(nn.Module):
-    def __init__(self, n_heads, d_model, d_key, d_value, device):
+    def __init__(self, n_heads, d_model, d_key, d_value, device, dropout_p):
         super().__init__()
         self._n_heads = n_heads
         self._d_model = d_model
@@ -287,6 +287,7 @@ class RepeatBlock(nn.Module):
             self._d_key,
             masked=True,
             device=self._device,
+            dropout_p=dropout_p
         )
         self._multi_head_attn = BatchMultiHeadAttentionV2(
             self._n_heads,
@@ -295,34 +296,37 @@ class RepeatBlock(nn.Module):
             self._d_key,
             masked=False,
             device=self._device,
+            dropout_p=dropout_p
         )
         self._layer_norm1 = torch.nn.LayerNorm(self._d_model, device=self._device)
         self._layer_norm2 = torch.nn.LayerNorm(self._d_model, device=self._device)
         self._layer_norm3 = torch.nn.LayerNorm(self._d_model, device=self._device)
         self._feed_forward = FFN(
-            in_units=self._d_model, out_units=self._d_model, device=self._device
+            in_units=self._d_model, out_units=self._d_model, device=self._device, dropout_p=dropout_p
         )
 
     def forward(self, X):
 
         # X: (B, T, M)
-
+        # changing implementation from paper "Attention is all you need"
+        # adding layer norm before attention instead of after 
+        # as it optimizes the convergence according to some of the articles
+        X = self._layer_norm1(X)  # (B, T, M)
         X_masked_attn_out = self._masked_multi_head_attn(X)  # (B, T, M)
         X = X + X_masked_attn_out  # (B, T, M)
-        X = self._layer_norm1(X)  # (B, T, M)
-
+        
+        X = self._layer_norm2(X)  # (B, T, M)
         X_attn_out = self._multi_head_attn(X)  # (B, T, M)
         X = X + X_attn_out  # (B, T, M)
-        X = self._layer_norm2(X)  # (B, T, M)
-
+        
+        X = self._layer_norm3(X)  # (B, T, M)
         X_ffn_out = self._feed_forward(X)  # (B, T, M)
         X = X + X_ffn_out  # (B, T, M)
-        X = self._layer_norm3(X)  # (B, T, M)
         return X
 
 
 class LLM(nn.Module):
-    def __init__(self, n_heads, d_model, d_key, d_value, n_x, vocab_size, device="cpu"):
+    def __init__(self, n_heads, d_model, d_key, d_value, n_x, vocab_size, dropout_p, device="cpu"):
         super().__init__()
         self._device = device
         self._n_heads = n_heads
@@ -343,6 +347,7 @@ class LLM(nn.Module):
             self._d_key,
             self._d_value,
             device=self._device,
+            dropout_p=dropout_p
         ) for _ in range(n_x)])
 
 
@@ -364,6 +369,13 @@ class LLM(nn.Module):
         # we need logits so removing softmax
         # X = torch.softmax(X, dim=0)
         return X[:, [-1], :]
+    
+    def total_params(self):
+        overall_params = 0 
+        for param in self.parameters():
+            params_count = param.numel()
+            overall_params += params_count
+        return overall_params
 
 
 def train(data_loader, llm_model: LLM, emb_model, loss_fn, optimizer, epochs, device):
@@ -446,6 +458,7 @@ def generate(
         # Append next token to sequence
         idxs = torch.cat([idxs, next_token.view(-1)], dim=0)
     return tokenizer.decode(idxs.cpu().tolist())  # tokenizer.decode(idxs.cpu().numpy())
+
 
 
 if __name__ == "__main__":
