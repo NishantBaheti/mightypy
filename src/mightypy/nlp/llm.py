@@ -8,14 +8,15 @@ from torch import nn
 from tokkit import PyBytePairTokenizer
 from tqdm import tqdm
 
+_PYTORCH_DTYPE = torch.float16
 
 class Word2Vec(nn.Module):
     def __init__(self, vocab_size, embedding_dims, device="cpu"):
         super().__init__()
         self.embedding = nn.Embedding(
-            vocab_size, embedding_dims, device=device
+            vocab_size, embedding_dims, device=device, dtype=_PYTORCH_DTYPE
         )  # V x E
-        self.linear = nn.Linear(embedding_dims, vocab_size, device=device)  # E x V
+        self.linear = nn.Linear(embedding_dims, vocab_size, device=device, dtype=_PYTORCH_DTYPE)  # E x V
 
     def forward(self, X: torch.Tensor):
         embeds = self.embedding(X)  # (B, T, M)
@@ -45,7 +46,8 @@ class BatchMultiHeadAttention(nn.Module):
                 self._d_k,
                 self._d_model,
                 requires_grad=True,
-                device=self._device,
+                device=self._device, 
+                dtype=_PYTORCH_DTYPE
             )
             * 1e-1
         )  # (H, K, M)
@@ -56,6 +58,7 @@ class BatchMultiHeadAttention(nn.Module):
                 self._d_model,
                 requires_grad=True,
                 device=self._device,
+                dtype=_PYTORCH_DTYPE
             )
             * 1e-1
         )  # (H, K, M)
@@ -66,6 +69,7 @@ class BatchMultiHeadAttention(nn.Module):
                 self._d_model,
                 requires_grad=True,
                 device=self._device,
+                dtype=_PYTORCH_DTYPE
             )
             * 1e-1
         )  # (H, V, M)
@@ -75,6 +79,7 @@ class BatchMultiHeadAttention(nn.Module):
                 self._d_model,
                 requires_grad=True,
                 device=self._device,
+                dtype=_PYTORCH_DTYPE
             )
             * 1e-1
         )  # (H*V, M)
@@ -148,16 +153,16 @@ class BatchMultiHeadAttentionV2(nn.Module):
         # In new approach all the heads outputs are generated in single/mono multiplication and
         # output is reshaped. Somehow this is more optimized :| , but less interpretable
         self.w_q = nn.Linear(
-            self._d_model, self._d_k * self._n_heads, bias=True, device=self._device
+            self._d_model, self._d_k * self._n_heads, bias=True, device=self._device, dtype=_PYTORCH_DTYPE
         )
         self.w_k = nn.Linear(
-            self._d_model, self._d_k * self._n_heads, bias=True, device=self._device
+            self._d_model, self._d_k * self._n_heads, bias=True, device=self._device, dtype=_PYTORCH_DTYPE
         )
         self.w_v = nn.Linear(
-            self._d_model, self._d_v * self._n_heads, bias=True, device=self._device
+            self._d_model, self._d_v * self._n_heads, bias=True, device=self._device, dtype=_PYTORCH_DTYPE
         )
         self.w_o = nn.Linear(
-            self._n_heads * self._d_v, self._d_model, bias=True, device=self._device
+            self._n_heads * self._d_v, self._d_model, bias=True, device=self._device, dtype=_PYTORCH_DTYPE
         )
         self.resid_dropout = nn.Dropout(dropout_p)
 
@@ -179,7 +184,7 @@ class BatchMultiHeadAttentionV2(nn.Module):
         # scaled dot product
         # (B, H, T, K) x (B, H, K, T) := (B, H, T, T)
         scaled_dot_product = (q @ k.transpose(-2, -1)) / torch.sqrt(
-            torch.tensor(self._d_k, dtype=torch.float32, device=self._device)
+            torch.tensor(self._d_k, dtype=_PYTORCH_DTYPE, device=self._device)
         )
         # print(scaled_dot_product.shape)
 
@@ -195,7 +200,7 @@ class BatchMultiHeadAttentionV2(nn.Module):
             )
 
         scaled_dot_product_probs = torch.softmax(
-            scaled_dot_product, dim=-1
+            scaled_dot_product, dim=-1, dtype=_PYTORCH_DTYPE
         )  # (B, H, T, T)
 
         # print("Scaled Dot Product Probabilities ", scaled_dot_product_probs.shape, scaled_dot_product_probs.sum(dim=-1))
@@ -230,8 +235,8 @@ class PositionalEncoding(nn.Module):
         * Rows - Positions (sentence length, number of tokens in input sentence)
         * Columns - Dimensions (Dimensions of embedding or models)
         """
-        p = torch.zeros((self._context_len, self._d_model), device=self._device)
-        positions = torch.arange(self._context_len).unsqueeze(1)
+        p = torch.zeros((self._context_len, self._d_model), device=self._device, dtype=_PYTORCH_DTYPE)
+        positions = torch.arange(self._context_len, dtype=_PYTORCH_DTYPE).unsqueeze(1)
         denominator = 1 / torch.pow(
             self.scale, torch.arange(0, self._d_model, 2).unsqueeze(0) / self._d_model
         )
@@ -256,10 +261,10 @@ class PositionalEncoding(nn.Module):
 class FFN(nn.Module):
     def __init__(self, in_units, out_units, dropout_p=0.2, device="cpu"):
         super().__init__()
-        self.linear1 = torch.nn.Linear(in_units, in_units * 4, bias=True, device=device)
+        self.linear1 = torch.nn.Linear(in_units, in_units * 4, bias=True, device=device, dtype=_PYTORCH_DTYPE)
         self.relu = torch.nn.ReLU().to(device)
         self.linear2 = torch.nn.Linear(
-            in_units * 4, out_units, bias=True, device=device
+            in_units * 4, out_units, bias=True, device=device, dtype=_PYTORCH_DTYPE
         )
         self.dropout = nn.Dropout(dropout_p)
 
@@ -337,7 +342,7 @@ class LLM(nn.Module):
         self._vocab_size = vocab_size
         self._pe = PositionalEncoding(d_model=self._d_model, device=self._device)
         self._linear = torch.nn.Linear(
-            self._d_model, self._vocab_size, bias=False, device=self._device
+            self._d_model, self._vocab_size, bias=False, device=self._device, dtype=_PYTORCH_DTYPE
         )
         # in pytorch to create repeat list for iteratiion 
         # Module list must be used

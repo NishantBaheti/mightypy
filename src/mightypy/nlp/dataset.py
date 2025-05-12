@@ -34,8 +34,8 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         return (
-            torch.tensor(self.tokens[idx : idx + self.context_length]).to(self.device),
-            torch.tensor([self.tokens[idx + self.context_length]]).to(self.device),
+            torch.tensor(self.tokens[idx : idx + self.context_length], dtype=torch.long).to(self.device),
+            torch.tensor([self.tokens[idx + self.context_length]], dtype=torch.long).to(self.device),
         )
 
 
