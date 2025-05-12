@@ -29,7 +29,8 @@ dependencies = [
     "tqdm==4.67.1",
     "tokkit==0.0.5",
     "torch==2.6.0",
-    "requests==2.32.3"
+    "requests==2.32.3",
+    "pyYaml"
 ]
 
 [project.optional-dependencies] # Optional

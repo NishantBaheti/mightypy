@@ -5,16 +5,16 @@ from mightypy.nlp.dataset import CustomDataset
 from mightypy.nlp.llm import LLM, Word2Vec, train, generate
 from tokkit import PyBytePairTokenizer, data_loader
 from torch.utils.data import DataLoader
+import yaml
 
-
-N_HEADS = 6
-D_MODEL = 100
+N_HEADS = 10
+D_MODEL = 256
 D_KEY = 7
 D_VALUE = 7
-N_X = 5
-CONTEXT_LENGTH = 10
-DROPOUT = 0.5
-VOCAB_SIZE = 300
+N_X = 10
+CONTEXT_LENGTH = 100
+DROPOUT = 0.4
+VOCAB_SIZE = 500
 
 EPOCHS = 10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -53,9 +53,20 @@ optimizer = torch.optim.Adam(llm_model.parameters(), lr=0.001, eps=1e-10, betas=
 # out = model.forward(input_embeddings)
 # print(out.shape)
 # print(out.sum(dim=0))
+with open('input_texts.yaml', 'r') as file:
+    texts = yaml.safe_load(file)
+for text in texts:
+    print(text, " : " , generate(llm_model, embedding_model, tokenizer, text, 1000, 5, 1.0, device=device))
 
-print(generate(llm_model, embedding_model, tokenizer, "Hello", 10, 5, 1.0, device=device))
+for i in range(EPOCHS):
+    train(dataloader, llm_model, embedding_model, loss_fn, optimizer, 1, device)
+    
+    with open('input_texts.yaml', 'r') as file:
+        texts = yaml.safe_load(file)
+    for text in texts:
+        print(text, " : " , generate(llm_model, embedding_model, tokenizer, text, 1000, 5, 1.0, device=device))
 
-train(dataloader, llm_model, embedding_model, loss_fn, optimizer, EPOCHS, device)
 
-print(generate(llm_model, embedding_model, tokenizer, "Hello", 10, 5, 1.0, device=device))
+    if i % 10 == 0:
+        torch.save(llm_model.state_dict(), f"models/llm_{datetime.now()}.pth")
+        torch.save(embedding_model.state_dict(), f"models/embedding_{datetime.now()}.pth")
