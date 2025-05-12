@@ -303,9 +303,9 @@ class RepeatBlock(nn.Module):
             device=self._device,
             dropout_p=dropout_p
         )
-        self._layer_norm1 = torch.nn.LayerNorm(self._d_model, device=self._device)
-        self._layer_norm2 = torch.nn.LayerNorm(self._d_model, device=self._device)
-        self._layer_norm3 = torch.nn.LayerNorm(self._d_model, device=self._device)
+        self._layer_norm1 = torch.nn.LayerNorm(self._d_model, device=self._device, dtype=_PYTORCH_DTYPE)
+        self._layer_norm2 = torch.nn.LayerNorm(self._d_model, device=self._device, dtype=_PYTORCH_DTYPE)
+        self._layer_norm3 = torch.nn.LayerNorm(self._d_model, device=self._device, dtype=_PYTORCH_DTYPE)
         self._feed_forward = FFN(
             in_units=self._d_model, out_units=self._d_model, device=self._device, dropout_p=dropout_p
         )
