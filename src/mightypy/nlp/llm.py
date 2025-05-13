@@ -8,7 +8,7 @@ from torch import nn
 from tokkit import PyBytePairTokenizer
 from tqdm import tqdm
 
-_PYTORCH_DTYPE = torch.float16
+_PYTORCH_DTYPE = torch.float32
 
 class Word2Vec(nn.Module):
     def __init__(self, vocab_size, embedding_dims, device="cpu"):
