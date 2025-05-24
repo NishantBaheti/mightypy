@@ -7,7 +7,7 @@ import numpy as np
 
 def sigmoid(val: np.ndarray) -> np.ndarray:
     """Sigmoid function
-    
+
     .. math::
         f(z) = \\frac{1}{1 + e^{-z}}
 

@@ -149,5 +149,5 @@ if __name__ == "__main__":
         dataframe=df, user_col="userId", item_col="movieId", score_col="rating"
     )
 
-    plt.plot(losses, 'o-')
+    plt.plot(losses, "o-")
     plt.savefig("/workspaces/mightypy/plots/loss_plot.png")

@@ -1,7 +1,8 @@
 """
-FFT Denoiser 
+FFT Denoiser
 -------------
 """
+
 # Authors: Nishant Baheti <nishantbaheti.it19@gmail.com>
 
 from typing import Optional, Union
