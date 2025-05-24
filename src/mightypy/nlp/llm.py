@@ -153,16 +153,16 @@ class BatchMultiHeadAttentionV2(nn.Module):
         # In new approach all the heads outputs are generated in single/mono multiplication and
         # output is reshaped. Somehow this is more optimized :| , but less interpretable
         self.w_q = nn.Linear(
-            self._d_model, self._d_k * self._n_heads, bias=True, device=self._device, dtype=_PYTORCH_DTYPE
+            self._d_model, self._d_k * self._n_heads, bias=False, device=self._device, dtype=_PYTORCH_DTYPE
         )
         self.w_k = nn.Linear(
-            self._d_model, self._d_k * self._n_heads, bias=True, device=self._device, dtype=_PYTORCH_DTYPE
+            self._d_model, self._d_k * self._n_heads, bias=False, device=self._device, dtype=_PYTORCH_DTYPE
         )
         self.w_v = nn.Linear(
-            self._d_model, self._d_v * self._n_heads, bias=True, device=self._device, dtype=_PYTORCH_DTYPE
+            self._d_model, self._d_v * self._n_heads, bias=False, device=self._device, dtype=_PYTORCH_DTYPE
         )
         self.w_o = nn.Linear(
-            self._n_heads * self._d_v, self._d_model, bias=True, device=self._device, dtype=_PYTORCH_DTYPE
+            self._n_heads * self._d_v, self._d_model, bias=False, device=self._device, dtype=_PYTORCH_DTYPE
         )
         self.resid_dropout = nn.Dropout(dropout_p)
 
